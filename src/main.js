@@ -7,9 +7,12 @@ import axios from "axios";
 import echarts from "echarts";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-import "common/family/font.css";
 import "common/family/pingfang.css";
 import "swiper/dist/css/swiper.min.css";
+import VuePaginate from "vue-paginate";
+Vue.use(VuePaginate);
+import page from "v-page";
+Vue.use(page);
 // import { dateFilter } from "common/js/dateFilter.js"; // 引入我们刚刚创建的文件
 Vue.config.productionTip = false;
 // axios.defaults.baseURL = "/api";

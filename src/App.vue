@@ -7,25 +7,27 @@
 
 <script>
 export default {
-    name: 'App'
-}
+  name: "App"
+};
 </script>
 
 <style>
 #app {
   width: 100%;
-  height: 100%;
-  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  /* font-family: "Avenir", Helvetica, Arial, sans-serif; */
+  font-family: "PingFang";
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #fff;
+  color: #333;
+  background-color: rgb(248, 248, 248);
   padding: 0;
   margin: 0;
   top: 0;
   left: 0;
   bottom: 0;
   right: 0;
+  font-size: 14px;
 }
 * {
   margin: 0;
@@ -166,5 +168,32 @@ a:focus,
 }
 .fr {
   float: right;
+}
+th {
+  height: 60px;
+  line-height: 60px;
+}
+tr {
+  height: 56px;
+  line-height: 56px;
+  /* padding-left: 26px; */
+}
+table tr:nth-child(odd) {
+  background: #fff;
+}
+table tr:nth-child(even) {
+  background: #eef6ff;
+}
+table {
+  width: 100%;
+  table-layout: fixed;
+}
+td,
+th {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-align: left;
+  padding-right: 10px;
 }
 </style>
