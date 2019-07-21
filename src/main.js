@@ -7,7 +7,7 @@ import axios from "axios";
 import echarts from "echarts";
 import ElementUI from "element-ui";
 import "element-ui/lib/theme-chalk/index.css";
-import "common/family/pingfang.css";
+// import "common/family/pingfang.css";
 import "swiper/dist/css/swiper.min.css";
 import VuePaginate from "vue-paginate";
 Vue.use(VuePaginate);

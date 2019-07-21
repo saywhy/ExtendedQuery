@@ -1,5 +1,5 @@
-<template>
-    <div class="ip">
+<template >
+    <div class="ip" v-loading.fullscreen.lock="loading" v-cloak>
         <div class="title">IP查询</div>
         <div class="container">
             <div class="report clearfix">
@@ -382,6 +382,7 @@
             margin-left: 15px;
           }
           .report_bom_span {
+            vertical-align: middle;
             margin-left: -20px;
             display: inline-block;
             padding: 0 10px;
@@ -589,16 +590,18 @@ export default {
         DNS: false,
         Files: false,
         Hosted: false
-      }
+      },
+      loading: true
     };
   },
   created() {
     // console.log(this.$route.query.name);
     this.indicator = this.$route.query.name;
+    this.loading = true;
+    this.intelligence();
   },
   mounted() {
     // console.log(this.$route.query.name);
-    this.intelligence();
   },
   methods: {
     intelligence() {
@@ -728,6 +731,9 @@ export default {
             } else {
               this.ip_data.IpWhoIs.Asn = [{ Description_cn: "", Number: "" }];
             }
+            setTimeout(() => {
+              this.loading = false;
+            }, 4000);
           }
         })
         .catch(error => {

@@ -1,5 +1,5 @@
 <template>
-    <div class="hash">
+    <div class="hash" v-loading.fullscreen.lock="loading" v-cloak>
         <div class="title">Hash查询</div>
         <div class="container">
             <!-- Hash report for MD5: -->
@@ -558,6 +558,7 @@
           margin-left: 15px;
         }
         .report_bom_span {
+          vertical-align: middle;
           margin-left: -20px;
           display: inline-block;
           padding: 0 10px;
@@ -756,12 +757,14 @@ export default {
       FilenamestotalRow: 100,
       FilenamespageArr: [],
       FilePathstotalRow: 100,
-      FilePathspageArr: []
+      FilePathspageArr: [],
+      loading: true
     };
   },
   created() {
     // console.log(this.$route.query.name);
     this.indicator = this.$route.query.name;
+    this.loading = true;
     this.intelligence();
   },
   mounted() {
@@ -968,6 +971,9 @@ export default {
               this.objwastotalRow = 0;
             }
             this.hash_data = response.data.data.result;
+            setTimeout(() => {
+              this.loading = false;
+            }, 4000);
           }
         })
         .catch(error => {

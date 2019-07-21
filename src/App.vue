@@ -14,8 +14,8 @@ export default {
 <style>
 #app {
   width: 100%;
-  /* font-family: "Avenir", Helvetica, Arial, sans-serif; */
-  font-family: "PingFang";
+  font-family: "Avenir", Helvetica, Arial, sans-serif;
+  /* font-family: "PingFang"; */
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -28,6 +28,9 @@ export default {
   bottom: 0;
   right: 0;
   font-size: 14px;
+}
+[v-cloak] {
+  display: none;
 }
 * {
   margin: 0;

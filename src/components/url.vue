@@ -1,5 +1,5 @@
 <template>
-    <div class="url">
+    <div class="url" v-loading.fullscreen.lock="loading" v-cloak>
         <div class="title">URL查询</div>
         <div class="container">
             <div class="report clearfix">
@@ -414,6 +414,7 @@
           margin-left: 15px;
         }
         .report_bom_span {
+          vertical-align: middle;
           margin-left: -20px;
           display: inline-block;
           padding: 0 10px;
@@ -666,12 +667,14 @@ export default {
         files: false,
         requested: false,
         url: false
-      }
+      },
+      loading: true
     };
   },
   created() {
     console.log(this.$route.query.name);
     this.indicator = this.$route.query.name;
+    this.loading = true;
     this.intelligence();
   },
   mounted() {
@@ -820,6 +823,9 @@ export default {
               this.urltotalRow = 0;
             }
             this.url_data = response.data.data.result;
+            setTimeout(() => {
+              this.loading = false;
+            }, 4000);
           }
         })
         .catch(error => {

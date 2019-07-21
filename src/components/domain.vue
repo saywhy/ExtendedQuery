@@ -1,5 +1,5 @@
-<template>
-    <div class="domain">
+<template >
+    <div class="domain" v-loading.fullscreen.lock="loading" v-cloak>
         <div class="title">域名查询</div>
         <div class="container">
             <!-- Report for Domain:  -->
@@ -484,6 +484,7 @@
             margin-left: 15px;
           }
           .report_bom_span {
+            vertical-align: middle;
             margin-left: -20px;
             display: inline-block;
             padding: 0 10px;
@@ -700,12 +701,14 @@ export default {
         requested: false,
         Referrals: false,
         Marks: false
-      }
+      },
+      loading: true
     };
   },
   created() {
     console.log(this.$route.query.name);
     this.indicator = this.$route.query.name;
+    this.loading = true;
     this.intelligence();
   },
   mounted() {
@@ -892,6 +895,9 @@ export default {
             }
             this.domain_data = response.data.data.result;
             console.log(this.domain_data);
+            setTimeout(() => {
+              this.loading = false;
+            }, 4000);
           }
         })
         .catch(error => {
