@@ -126,94 +126,100 @@
 }
 </style>
 <script>
-import Swiper from 'swiper';
+import Swiper from "swiper";
 export default {
-    name: 'home',
-    data() {
-        return {
-            search: {
-                indicator: ''
-            },
-            news_array: []
-        }
+  name: "home",
+  data() {
+    return {
+      search: {
+        indicator: ""
+      },
+      news_array: []
+    };
+  },
+  created() {
+    console.log(this.$route.query.name);
+  },
+  mounted() {
+    console.log(this.$route.query.name);
+    this.get_new();
+  },
+  methods: {
+    get_new() {
+      // this.$axios.get('https://47.105.196.251/site/safety-news')
+      this.$axios
+        .get("/site/safety-news")
+        .then(response => {
+          if (response.data.status == "success") {
+            this.news_array = response.data.data;
+            this.initSwiper();
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     },
-    created() {
-        console.log(this.$route.query.name);
+    initSwiper() {
+      this.$nextTick(() => {
+        var swiper = new Swiper(".swiper-container", {
+          autoplay: {
+            disableOnInteraction: false
+          }, //可选选项，自动滑动
+          loop: true,
+          speed: 1000,
+          spaceBetween: 30,
+          slidesPerView: 4,
+          slidesPerGroup: 1,
+          pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+            dragSize: 30
+            // type: 'progress',
+          }
+        });
+      });
     },
-    mounted() {
-        console.log(this.$route.query.name);
-        this.get_new();
+    silder_click(item) {
+      console.log(item);
+      this.$router.push({
+        path: "/news",
+        query: { shopid: JSON.stringify(item) }
+      });
     },
-    methods: {
-        get_new() {
-            // this.$axios.get('https://47.105.196.251/site/safety-news')
-            this.$axios.get('/site/safety-news')
-                .then(response => {
-                    if (response.data.status == 'success') {
-                        this.news_array = response.data.data;
-                        this.initSwiper();
-                    }
-                })
-                .catch(error => {
-                    console.log(error);
-                })
-
-        },
-        initSwiper() {
-            this.$nextTick(() => {
-                var swiper = new Swiper(".swiper-container", {
-                    autoplay: {
-                        disableOnInteraction: false
-                    },//可选选项，自动滑动
-                    loop: true,
-                    speed: 1000,
-                    spaceBetween: 30,
-                    slidesPerView: 4,
-                    slidesPerGroup: 1,
-                    pagination: {
-                        el: ".swiper-pagination",
-                        clickable: true,
-                        dragSize: 30,
-                        // type: 'progress',
-                    },
-                });
-            })
-        },
-        silder_click(item) {
-            console.log(item);
-            this.$router.push({ path: '/news', query: { shopid: JSON.stringify(item) } })
-        },
-        open4() {
-            this.$message.error('没有搜索到信誉情报详情');
-        },
-        search_btn() {
-            if (this.search.indicator == '') {
-            } else {
-                // this.$axios.get('https://47.105.196.251/site/reputation', {
-                this.$axios.get('/site/reputation', {
-                    params: {
-                        indicator: this.search.indicator
-                        // indicator: '185.234.217.139'
-                    },
-                }
-                )
-                    .then(response => {
-                        console.log(response);
-                        if (response.data.status == "success") {
-                            if (response.data.data.result == null) {
-                                this.open4();
-                            } else {
-                                this.$router.push({ path: '/detail', query: { shopid: JSON.stringify(response.data.data.result) } })
-                            }
-                        }
-                    })
-                    .catch(error => {
-                        console.log(error);
-                    })
+    open4() {
+      this.$message.error("没有搜索到信誉情报详情");
+    },
+    search_btn() {
+      if (this.search.indicator == "") {
+      } else {
+        // this.$axios.get('https://47.105.196.251/site/reputation', {
+        this.$axios
+          .get("/site/reputation", {
+            params: {
+              indicator: this.search.indicator
+              // indicator: '185.234.217.139'
             }
-        }
+          })
+          .then(response => {
+            console.log(response);
+            if (response.data.status == "success") {
+              if (response.data.data.result == null) {
+                this.open4();
+              } else {
+                this.$router.push({
+                  path: "/detail",
+                  query: { shopid: JSON.stringify(response.data.data.result) }
+                });
+              }
+            }
+          })
+          .catch(error => {
+            console.log(error);
+          });
+      }
     }
-}
+  }
+};
 </script>
 
 

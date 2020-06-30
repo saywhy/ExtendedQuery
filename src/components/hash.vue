@@ -1,448 +1,658 @@
 <template>
-    <div class="hash" v-loading.fullscreen.lock="loading" v-cloak>
-        <div class="title">Hash查询</div>
-        <div class="container">
-            <!-- Hash report for MD5: -->
-            <div class="report clearfix">
-                <div class="report_top clearfix">
-                    <div class="report_top_title_box">
-                        <div class="report_top_title_box_left">
-                            <span class="report_top_title">Hash report for MD5: </span>
-                            <span class="report_top_name" :class="{red:hash_data.Zone=='Red',yellow:hash_data.Zone=='Yellow',grey:hash_data.Zone=='Grey',green:hash_data.Zone=='Green'}">{{hash_data.Zone_hoohoolab}}</span>
-                        </div>
-                        <!-- <div class="report_top_title_box_right">
+  <div class="hash"
+       v-loading.fullscreen.lock="loading"
+       v-cloak>
+    <div class="title">
+      Hash查询
+      <span class="data_source"
+            v-if="ip_data_all.source=='offline'">
+        <span>数据来自本地缓存</span>
+      </span>
+      <span class="info_img"
+            v-if="ip_data_all.source=='offline'">
+        <el-tooltip class="item"
+                    effect="dark"
+                    :content="ip_data_all.addtime*1000 | datefrm"
+                    placement="bottom">
+          <img src="../common/image/ip/info.png"
+               alt="">
+        </el-tooltip>
+      </span>
+      <button v-if="ip_data_all.source=='offline'"
+              class="btn_now"
+              @click="refresh">立即刷新</button>
+    </div>
+    <div class="container">
+      <!-- Hash report for MD5: -->
+      <div class="report clearfix">
+        <div class="report_top clearfix">
+          <div class="report_top_title_box">
+            <div class="report_top_title_box_left">
+              <span class="report_top_title">Hash report for MD5: </span>
+              <span class="report_top_name"
+                    :class="{red:hash_data.Zone=='Red',yellow:hash_data.Zone=='Yellow',grey:hash_data.Zone=='Grey',green:hash_data.Zone=='Green'}">{{hash_data.Zone_hoohoolab}}</span>
+            </div>
+            <!-- <div class="report_top_title_box_right">
                             <img class="report_top_title_box_right_img" src="../common/image/ip/a.png" alt="">
                             <span class="report_top_title_box_right_span">Copy Request</span>
                             <img class="report_top_title_box_right_img" src="../common/image/ip/down.png" alt="">
                             <span class="report_top_title_box_right_span">Export all results</span>
                         </div> -->
-                    </div>
-                    <div class="report_top_bom">
-                        <img src="" alt="">
-                        <span>{{indicator}}</span>
-                    </div>
-                </div>
-                <div class="report_mid">
-                    <el-row class="report_mid_item">
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Hits</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.HitsCount">{{hash_data.FileGeneralInfo.HitsCount}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">First Seen</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.FirstSeen">{{hash_data.FileGeneralInfo.FirstSeen}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Last Seen</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.LastSeen">{{hash_data.FileGeneralInfo.LastSeen}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Format</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.Type">{{hash_data.FileGeneralInfo.Type}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Size</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.Size">{{hash_data.FileGeneralInfo.Size}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Signed By</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.Signer">{{hash_data.FileGeneralInfo.Signer}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Packed By</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.Packer">{{hash_data.FileGeneralInfo.Packer}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">MD5</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.Md5">{{hash_data.FileGeneralInfo.Md5}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">SHA-256</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.Sha256">{{hash_data.FileGeneralInfo.Sha256}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">SHA-1</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileGeneralInfo.Sha1">{{hash_data.FileGeneralInfo.Sha1}}</p>
-                        </el-col>
-                    </el-row>
-                </div>
-            </div>
+          </div>
+          <div class="report_top_bom">
+            <img src=""
+                 alt="">
+            <span>{{indicator}}</span>
+          </div>
+        </div>
+        <div class="report_mid">
+          <el-row class="report_mid_item">
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Hits</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.HitsCount">{{hash_data.FileGeneralInfo.HitsCount}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">First Seen</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.FirstSeen">{{hash_data.FileGeneralInfo.FirstSeen}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Last Seen</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.LastSeen">{{hash_data.FileGeneralInfo.LastSeen}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Format</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.Type">{{hash_data.FileGeneralInfo.Type}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Size</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.Size">{{hash_data.FileGeneralInfo.Size}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Signed By</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.Signer">{{hash_data.FileGeneralInfo.Signer}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Packed By</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.Packer">{{hash_data.FileGeneralInfo.Packer}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">MD5</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.Md5">{{hash_data.FileGeneralInfo.Md5}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">SHA-256</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.Sha256">{{hash_data.FileGeneralInfo.Sha256}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">SHA-1</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileGeneralInfo.Sha1">{{hash_data.FileGeneralInfo.Sha1}}</p>
+            </el-col>
+          </el-row>
+        </div>
+      </div>
 
-            <!-- Detection name -->
-            <div class="detection" v-if="item_type.detection">
-                <div class="detection_top ">
-                    <span class="detection_top_name">Detection name</span>
-                    <!-- <img class="detection_top_img" src="../common/image/ip/info.png" alt=""> -->
-                </div>
-                <div class="detection_bom">
-                    <el-row class="detection_bom_box" :gutter="80">
-                        <el-col :span="6" class="detection_bom_item" v-for="(item,index) in hash_data.DetectionsInfo" :key="index">
-                            <div class="detection_bom_item_box">
-                                <p class="detection_bom_item_box_name">{{item.LastDetectDate}}</p>
-                                <p class="detection_bom_item_box_value" :title="item.DetectionName">{{item.DetectionName}}</p>
-                            </div>
-                        </el-col>
-                    </el-row>
-                </div>
-            </div>
+      <!-- Detection name -->
+      <div class="detection"
+           v-if="item_type.detection">
+        <div class="detection_top ">
+          <span class="detection_top_name">Detection name</span>
+          <!-- <img class="detection_top_img" src="../common/image/ip/info.png" alt=""> -->
+        </div>
+        <div class="detection_bom">
+          <el-row class="detection_bom_box"
+                  :gutter="80">
+            <el-col :span="6"
+                    class="detection_bom_item"
+                    v-for="(item,index) in hash_data.DetectionsInfo"
+                    :key="index">
+              <div class="detection_bom_item_box">
+                <p class="detection_bom_item_box_name">{{item.LastDetectDate}}</p>
+                <p class="detection_bom_item_box_value"
+                   :title="item.DetectionName">{{item.DetectionName}}</p>
+              </div>
+            </el-col>
+          </el-row>
+        </div>
+      </div>
 
-            <!-- File signatures and certificates -->
-            <div class="report clearfix" v-if="item_type.signatures">
-                <div class="report_top clearfix" style="height:58px;">
-                    <div class="report_top_title_box">
-                        <div class="report_top_title_box_left">
-                            <span class="report_top_title">File signatures and certificates</span>
-                            <!-- <img class="report_top_img" src="../common/image/ip/info.png" alt=""> -->
-                        </div>
-                    </div>
-                </div>
-                <div class="report_mid">
-                    <el-row class="report_mid_item">
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Vendor</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileCertificates[0].Vendor">{{hash_data.FileCertificates[0].Vendor}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Publisher</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileCertificates[0].Publisher">{{hash_data.FileCertificates[0].Publisher}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Signed</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileCertificates[0].TimeStamp">{{hash_data.FileCertificates[0].TimeStamp}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Issued</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileCertificates[0].Issued">{{hash_data.FileCertificates[0].Issued}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Expires</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileCertificates[0].Expires">{{hash_data.FileCertificates[0].Expires}}</p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Seiral Number</p>
-                            <p class="report_mid_item_col_value" :title="hash_data.FileCertificates[0].SerialNumber">{{hash_data.FileCertificates[0].SerialNumber}}</p>
-                        </el-col>
-                    </el-row>
-                </div>
+      <!-- File signatures and certificates -->
+      <div class="report clearfix"
+           v-if="item_type.signatures">
+        <div class="report_top clearfix"
+             style="height:58px;">
+          <div class="report_top_title_box">
+            <div class="report_top_title_box_left">
+              <span class="report_top_title">File signatures and certificates</span>
+              <!-- <img class="report_top_img" src="../common/image/ip/info.png" alt=""> -->
             </div>
-            <!-- File names-File paths -->
-            <div class="file">
-                <el-row class="file_box">
-                    <el-col :span="12" class="file_box_item" v-if="item_type.names" style="padding-right: 10px;">
-                        <div class="file_box_item_top ">
-                            <span class="file_box_item_top_name">File names</span>
-                            <!-- <img class="file_box_item_top_img" src="../common/image/ip/info.png" alt="">
+          </div>
+        </div>
+        <div class="report_mid">
+          <el-row class="report_mid_item">
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Vendor</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileCertificates[0].Vendor">{{hash_data.FileCertificates[0].Vendor}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Publisher</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileCertificates[0].Publisher">{{hash_data.FileCertificates[0].Publisher}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Signed</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileCertificates[0].TimeStamp">{{hash_data.FileCertificates[0].TimeStamp}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Issued</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileCertificates[0].Issued">{{hash_data.FileCertificates[0].Issued}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Expires</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileCertificates[0].Expires">{{hash_data.FileCertificates[0].Expires}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Seiral Number</p>
+              <p class="report_mid_item_col_value"
+                 :title="hash_data.FileCertificates[0].SerialNumber">{{hash_data.FileCertificates[0].SerialNumber}}</p>
+            </el-col>
+          </el-row>
+        </div>
+      </div>
+      <!-- File names-File paths -->
+      <div class="file">
+        <el-row class="file_box">
+          <el-col :span="12"
+                  class="file_box_item"
+                  v-if="item_type.names"
+                  style="padding-right: 10px;">
+            <div class="file_box_item_top ">
+              <span class="file_box_item_top_name">File names</span>
+              <!-- <img class="file_box_item_top_img" src="../common/image/ip/info.png" alt="">
                             <span class="file_box_item_top_right">
                                 <img class="file_box_item_top_right_img" src="../common/image/ip/down.png" alt="">
                                 <span class="file_box_item_top_right_name">Download Data</span>
                             </span> -->
-                        </div>
-                        <div class="file_box_item_bom">
-                            <table>
-                                <tr>
-                                    <th style="padding-left:36px;">Hits(≈)</th>
-                                    <th style="padding-right:36px;">File name</th>
-                                </tr>
-                                <tr v-for="item in FilenamespageArr">
-                                    <td style="padding-left:36px;" :title="item.FileNamesHitsCount">{{item.FileNamesHitsCount}}</td>
-                                    <td style="padding-right:36px;" :title="item.FileName">
-                                        {{item.FileName}}
-                                    </td>
-                                </tr>
-                            </table>
-                            <v-page class="downloaded_page" :total-row="FilenamestotalRow" :page-size-menu='false' @page-change="FilenamespageChange" :border="false" align="center"></v-page>
-                        </div>
-                    </el-col>
-                    <el-col :span="12" class="file_box_item" v-if="item_type.paths" style="padding-left: 10px;">
-                        <div class="file_box_item_top ">
-                            <span class="file_box_item_top_name">File paths</span>
-                            <!-- <img class="file_box_item_top_img" src="../common/image/ip/info.png" alt="">
+            </div>
+            <div class="file_box_item_bom">
+              <table>
+                <tr>
+                  <th style="padding-left:36px;">Hits(≈)</th>
+                  <th style="padding-right:36px;">File name</th>
+                </tr>
+                <tr v-for="item in FilenamespageArr">
+                  <td style="padding-left:36px;"
+                      :title="item.FileNamesHitsCount">{{item.FileNamesHitsCount}}</td>
+                  <td style="padding-right:36px;"
+                      :title="item.FileName">
+                    {{item.FileName}}
+                  </td>
+                </tr>
+              </table>
+              <v-page class="downloaded_page"
+                      :total-row="FilenamestotalRow"
+                      :page-size-menu='false'
+                      @page-change="FilenamespageChange"
+                      :border="false"
+                      align="center"></v-page>
+            </div>
+          </el-col>
+          <el-col :span="12"
+                  class="file_box_item"
+                  v-if="item_type.paths"
+                  style="padding-left: 10px;">
+            <div class="file_box_item_top ">
+              <span class="file_box_item_top_name">File paths</span>
+              <!-- <img class="file_box_item_top_img" src="../common/image/ip/info.png" alt="">
                             <span class="file_box_item_top_right">
                                 <img class="file_box_item_top_right_img" src="../common/image/ip/down.png" alt="">
                                 <span class="file_box_item_top_right_name">Download Data</span>
                             </span> -->
-                        </div>
-                        <div class="file_box_item_bom">
-                            <table>
-                                <tr>
-                                    <th style="padding-left:36px;">Hits(≈)</th>
-                                    <th>Path</th>
-                                    <th style="padding-right:36px;">Loaction</th>
-                                </tr>
-                                <tr v-for="item in FilePathspageArr">
-                                    <td style="padding-left:36px;" :title="item.FilePathHitsCount">{{item.FilePathHitsCount}}</td>
-                                    <td :title="item.Path">{{item.Path}}</td>
-                                    <td style="padding-right:36px;" :title="item.Location">
-                                        {{item.Location}}
-                                    </td>
-                                </tr>
-                            </table>
-                            <v-page class="downloaded_page" :total-row="FilePathstotalRow" :page-size-menu='false' @page-change="FilePathspageChange" :border="false" align="center"></v-page>
-                        </div>
-
-                    </el-col>
-                </el-row>
+            </div>
+            <div class="file_box_item_bom">
+              <table>
+                <tr>
+                  <th style="padding-left:36px;">Hits(≈)</th>
+                  <th>Path</th>
+                  <th style="padding-right:36px;">Loaction</th>
+                </tr>
+                <tr v-for="item in FilePathspageArr">
+                  <td style="padding-left:36px;"
+                      :title="item.FilePathHitsCount">{{item.FilePathHitsCount}}</td>
+                  <td :title="item.Path">{{item.Path}}</td>
+                  <td style="padding-right:36px;"
+                      :title="item.Location">
+                    {{item.Location}}
+                  </td>
+                </tr>
+              </table>
+              <v-page class="downloaded_page"
+                      :total-row="FilePathstotalRow"
+                      :page-size-menu='false'
+                      @page-change="FilePathspageChange"
+                      :border="false"
+                      align="center"></v-page>
             </div>
 
-            <!-- File downloaded form URLs and Domains -->
-            <div class="downloaded clearfix" v-if="item_type.downloaded">
-                <div class="downloaded_top ">
-                    <span class="downloaded_top_name">File downloaded form URLs and Domains</span>
-                    <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
+          </el-col>
+        </el-row>
+      </div>
+
+      <!-- File downloaded form URLs and Domains -->
+      <div class="downloaded clearfix"
+           v-if="item_type.downloaded">
+        <div class="downloaded_top ">
+          <span class="downloaded_top_name">File downloaded form URLs and Domains</span>
+          <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="downloaded_top_right">
                         <img class="downloaded_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="downloaded_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="downloaded_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 850px;">URL</th>
-                            <th style="padding-right:36px;">Last Download</th>
-                        </tr>
-                        <tr v-for="item in downloadedpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.Url">{{item.Url?item.Url:'-'}}</td>
-                            <td style="padding-right:36px;" :title="item.LastDownloadDate">
-                                {{item.LastDownloadDate}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="downloaded_page" :total-row="downloadedtotalRow" :page-size-menu='false' @page-change="downloadedpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <!-- File accessed following URLs -->
-            <div class="downloaded clearfix" v-if="item_type.accessed">
-                <div class="downloaded_top ">
-                    <span class="downloaded_top_name">File accessed following URLs</span>
-                    <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
+        </div>
+        <div class="downloaded_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 850px;">URL</th>
+              <th style="padding-right:36px;">Last Download</th>
+            </tr>
+            <tr v-for="item in downloadedpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.Url">{{item.Url?item.Url:'-'}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.LastDownloadDate">
+                {{item.LastDownloadDate}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="downloaded_page"
+                  :total-row="downloadedtotalRow"
+                  :page-size-menu='false'
+                  @page-change="downloadedpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <!-- File accessed following URLs -->
+      <div class="downloaded clearfix"
+           v-if="item_type.accessed">
+        <div class="downloaded_top ">
+          <span class="downloaded_top_name">File accessed following URLs</span>
+          <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="downloaded_top_right">
                         <img class="downloaded_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="downloaded_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="downloaded_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 850px;">URL</th>
-                            <th style="padding-right:36px;">Last Accessed</th>
-                        </tr>
-                        <tr v-for="item in  accessedpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.Url">{{item.Url?item.Url:'-'}}</td>
-                            <td style="padding-right:36px;" :title="item.LastDownloadDate">
-                                {{item.LastDownloadDate}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="downloaded_page" :total-row="accessedtotalRow" :page-size-menu='false' @page-change="accessedpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <!-- Files start following objects -->
-            <div class="downloaded clearfix" v-if="item_type.start">
-                <div class="downloaded_top ">
-                    <span class="downloaded_top_name">Files start following objects</span>
-                    <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
+        </div>
+        <div class="downloaded_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 850px;">URL</th>
+              <th style="padding-right:36px;">Last Accessed</th>
+            </tr>
+            <tr v-for="item in  accessedpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.Url">{{item.Url?item.Url:'-'}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.LastDownloadDate">
+                {{item.LastDownloadDate}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="downloaded_page"
+                  :total-row="accessedtotalRow"
+                  :page-size-menu='false'
+                  @page-change="accessedpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <!-- Files start following objects -->
+      <div class="downloaded clearfix"
+           v-if="item_type.start">
+        <div class="downloaded_top ">
+          <span class="downloaded_top_name">Files start following objects</span>
+          <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="downloaded_top_right">
                         <img class="downloaded_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="downloaded_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="downloaded_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th>Hits(≈)</th>
-                            <th>Files MD5</th>
-                            <th>Location</th>
-                            <th>Path</th>
-                            <th>File Name</th>
-                            <th>Last Started</th>
-                            <th style="padding-right:36px;">Detection Name</th>
-                        </tr>
-                        <tr v-for="item in  startpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.HitsCount">{{item.HitsCount}}</td>
-                            <td :title="item.Md5">{{item.Md5}}</td>
-                            <td :title="item.Location">{{item.Location}}</td>
-                            <td :title="item.Path">{{item.Path}}</td>
-                            <td :title="item.Name">{{item.Name}}</td>
-                            <td :title="item.LastStartDate">{{item.LastStartDate}}</td>
-                            <td style="padding-right:36px;" :title="item.DetectionName">
-                                {{item.DetectionName}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="downloaded_page" :total-row="starttotalRow" :page-size-menu='false' @page-change="startpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <!-- Files was started by following objects -->
-            <div class="downloaded clearfix" v-if="item_type.was">
-                <div class="downloaded_top ">
-                    <span class="downloaded_top_name">Files was started by following objects</span>
-                    <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
+        </div>
+        <div class="downloaded_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th>Hits(≈)</th>
+              <th>Files MD5</th>
+              <th>Location</th>
+              <th>Path</th>
+              <th>File Name</th>
+              <th>Last Started</th>
+              <th style="padding-right:36px;">Detection Name</th>
+            </tr>
+            <tr v-for="item in  startpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.HitsCount">{{item.HitsCount}}</td>
+              <td :title="item.Md5">{{item.Md5}}</td>
+              <td :title="item.Location">{{item.Location}}</td>
+              <td :title="item.Path">{{item.Path}}</td>
+              <td :title="item.Name">{{item.Name}}</td>
+              <td :title="item.LastStartDate">{{item.LastStartDate}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DetectionName">
+                {{item.DetectionName}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="downloaded_page"
+                  :total-row="starttotalRow"
+                  :page-size-menu='false'
+                  @page-change="startpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <!-- Files was started by following objects -->
+      <div class="downloaded clearfix"
+           v-if="item_type.was">
+        <div class="downloaded_top ">
+          <span class="downloaded_top_name">Files was started by following objects</span>
+          <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="downloaded_top_right">
                         <img class="downloaded_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="downloaded_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="downloaded_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th>Hits(≈)</th>
-                            <th>Files MD5</th>
-                            <th>Location</th>
-                            <th>Path</th>
-                            <th>File Name</th>
-                            <th>Last Started</th>
-                            <th style="padding-right:36px;">Detection Name</th>
-                        </tr>
-                        <tr v-for="item in  waspageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.HitsCount">{{item.HitsCount}}</td>
-                            <td :title="item.Md5">{{item.Md5}}</td>
-                            <td :title="item.Location">{{item.Location}}</td>
-                            <td :title="item.Path">{{item.Path}}</td>
-                            <td :title="item.Name">{{item.Name}}</td>
-                            <td :title="item.LastStartDate">{{item.LastStartDate}}</td>
-                            <td style="padding-right:36px;" :title="item.DetectionName">
-                                {{item.DetectionName}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="downloaded_page" :total-row="wastotalRow" :page-size-menu='false' @page-change="waspageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <!-- Files downloaded following objects -->
-            <div class="downloaded clearfix" v-if="item_type.following">
-                <div class="downloaded_top ">
-                    <span class="downloaded_top_name">Files downloaded following objects</span>
-                    <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
+        </div>
+        <div class="downloaded_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th>Hits(≈)</th>
+              <th>Files MD5</th>
+              <th>Location</th>
+              <th>Path</th>
+              <th>File Name</th>
+              <th>Last Started</th>
+              <th style="padding-right:36px;">Detection Name</th>
+            </tr>
+            <tr v-for="item in  waspageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.HitsCount">{{item.HitsCount}}</td>
+              <td :title="item.Md5">{{item.Md5}}</td>
+              <td :title="item.Location">{{item.Location}}</td>
+              <td :title="item.Path">{{item.Path}}</td>
+              <td :title="item.Name">{{item.Name}}</td>
+              <td :title="item.LastStartDate">{{item.LastStartDate}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DetectionName">
+                {{item.DetectionName}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="downloaded_page"
+                  :total-row="wastotalRow"
+                  :page-size-menu='false'
+                  @page-change="waspageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <!-- Files downloaded following objects -->
+      <div class="downloaded clearfix"
+           v-if="item_type.following">
+        <div class="downloaded_top ">
+          <span class="downloaded_top_name">Files downloaded following objects</span>
+          <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="downloaded_top_right" :class="{'disabled_class':objdownloadedpageArr.length==0}">
                         <img class="downloaded_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="downloaded_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="downloaded_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th>Hits(≈)</th>
-                            <th>Files MD5</th>
-                            <th>Location</th>
-                            <th>Path</th>
-                            <th>File Name</th>
-                            <th>Last Download</th>
-                            <th style="padding-right:36px;">Detection Name</th>
-                        </tr>
-                        <tr v-for="item in  objdownloadedpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.HitsCount">{{item.HitsCount}}</td>
-                            <td :title="item.Md5">{{item.Md5}}</td>
-                            <td :title="item.Location">{{item.Location}}</td>
-                            <td :title="item.Path">{{item.Path}}</td>
-                            <td :title="item.Name">{{item.Name}}</td>
-                            <td :title="item.LastDownloadDate">{{item.LastDownloadDate}}</td>
-                            <td style="padding-right:36px;" :title="item.DetectionName">
-                                {{item.DetectionName}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="downloaded_page" v-if="objdownloadedpageArr.length!=0" :total-row="objdownloadedtotalRow" :page-size-menu='false' @page-change="objdownloadedpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <!-- Files was downloaded by following objects-->
-            <div class="downloaded clearfix" v-if="item_type.objects">
-                <div class="downloaded_top ">
-                    <span class="downloaded_top_name">Files was downloaded by following objects</span>
-                    <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
+        </div>
+        <div class="downloaded_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th>Hits(≈)</th>
+              <th>Files MD5</th>
+              <th>Location</th>
+              <th>Path</th>
+              <th>File Name</th>
+              <th>Last Download</th>
+              <th style="padding-right:36px;">Detection Name</th>
+            </tr>
+            <tr v-for="item in  objdownloadedpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.HitsCount">{{item.HitsCount}}</td>
+              <td :title="item.Md5">{{item.Md5}}</td>
+              <td :title="item.Location">{{item.Location}}</td>
+              <td :title="item.Path">{{item.Path}}</td>
+              <td :title="item.Name">{{item.Name}}</td>
+              <td :title="item.LastDownloadDate">{{item.LastDownloadDate}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DetectionName">
+                {{item.DetectionName}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="downloaded_page"
+                  v-if="objdownloadedpageArr.length!=0"
+                  :total-row="objdownloadedtotalRow"
+                  :page-size-menu='false'
+                  @page-change="objdownloadedpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <!-- Files was downloaded by following objects-->
+      <div class="downloaded clearfix"
+           v-if="item_type.objects">
+        <div class="downloaded_top ">
+          <span class="downloaded_top_name">Files was downloaded by following objects</span>
+          <!-- <img class="downloaded_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="downloaded_top_right">
                         <img class="downloaded_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="downloaded_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="downloaded_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th>Hits(≈)</th>
-                            <th>Files MD5</th>
-                            <th>Location</th>
-                            <th>Path</th>
-                            <th>File Name</th>
-                            <th>Last Download</th>
-                            <th style="padding-right:36px;">Detection Name</th>
-                        </tr>
-                        <tr v-for="item in  objwaspageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.HitsCount">{{item.HitsCount}}</td>
-                            <td :title="item.Md5">{{item.Md5}}</td>
-                            <td :title="item.Location">{{item.Location}}</td>
-                            <td :title="item.Path">{{item.Path}}</td>
-                            <td :title="item.Name">{{item.Name}}</td>
-                            <td :title="item.LastDownloadDate">{{item.LastDownloadDate}}</td>
-                            <td style="padding-right:36px;" :title="item.DetectionName">
-                                {{item.DetectionName}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="downloaded_page" :total-row="objwastotalRow" :page-size-menu='false' @page-change="objwaspageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-
         </div>
+        <div class="downloaded_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th>Hits(≈)</th>
+              <th>Files MD5</th>
+              <th>Location</th>
+              <th>Path</th>
+              <th>File Name</th>
+              <th>Last Download</th>
+              <th style="padding-right:36px;">Detection Name</th>
+            </tr>
+            <tr v-for="item in  objwaspageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.HitsCount">{{item.HitsCount}}</td>
+              <td :title="item.Md5">{{item.Md5}}</td>
+              <td :title="item.Location">{{item.Location}}</td>
+              <td :title="item.Path">{{item.Path}}</td>
+              <td :title="item.Name">{{item.Name}}</td>
+              <td :title="item.LastDownloadDate">{{item.LastDownloadDate}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DetectionName">
+                {{item.DetectionName}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="downloaded_page"
+                  :total-row="objwastotalRow"
+                  :page-size-menu='false'
+                  @page-change="objwaspageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+
     </div>
+  </div>
 </template>
 <style  lang="less">
 .hash {
@@ -475,6 +685,34 @@
     line-height: 64px;
     font-size: 20px;
     font-weight: 600;
+    position: relative;
+    .data_source {
+      font-size: 14px;
+      position: absolute;
+      right: 200px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .info_img {
+      position: absolute;
+      right: 150px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+    .btn_now {
+      cursor: pointer;
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0070ff;
+      font-size: 14px;
+      color: #fff;
+      width: 80px;
+      border-radius: 4px;
+      height: 32px;
+    }
   }
   .container {
     padding: 0 48px;
@@ -724,9 +962,10 @@
 }
 </style>
 <script>
+import moment from "moment";
 export default {
   name: "ip",
-  data() {
+  data () {
     return {
       item_type: {
         detection: false,
@@ -741,6 +980,7 @@ export default {
         objects: false
       },
       hash_data: "",
+      ip_data_all: "",
       indicator: "",
       downloadedtotalRow: 100,
       downloadedpageArr: [],
@@ -761,61 +1001,378 @@ export default {
       loading: true
     };
   },
-  created() {
+  created () {
     // console.log(this.$route.query.name);
     this.indicator = this.$route.query.name;
     this.loading = true;
-    this.intelligence();
+    setTimeout(() => {
+      this.loading = false;
+    }, 1000);
+    this.ip_data_all = JSON.parse(sessionStorage.getItem("FileGeneralInfo"));
+    switch (this.ip_data_all.result.Zone) {
+      case "Red":
+        this.ip_data_all.result.Zone_hoohoolab = "Malware";
+        break;
+      case "Yellow":
+        this.ip_data_all.result.Zone_hoohoolab = "Adware and other";
+        break;
+      case "Grey":
+        this.ip_data_all.result.Zone_hoohoolab = "Not categorized";
+        break;
+      case "Green":
+        this.ip_data_all.result.Zone_hoohoolab = "Clean";
+        break;
+      default:
+        break;
+    }
+    if (this.ip_data_all.result.DetectionsInfo) {
+      this.item_type.detection = true;
+    }
+    if (this.ip_data_all.result.FileCertificates) {
+      this.item_type.signatures = true;
+    }
+    if (this.ip_data_all.result.FileNames) {
+      this.item_type.names = true;
+      this.FilenamestotalRow = this.ip_data_all.result.FileNames.length;
+    }
+    if (this.ip_data_all.result.FilePaths) {
+      this.FilePathstotalRow = this.ip_data_all.result.FilePaths.length;
+      this.item_type.paths = true;
+    }
+    if (this.ip_data_all.result.FileDownloadedFromUrls) {
+      this.ip_data_all.result.FileDownloadedFromUrls.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Dangerous";
+            break;
+          case "Orange":
+            item.Zone_hoohoolab = "";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Good";
+            break;
+          default:
+            break;
+        }
+      });
+      this.downloadedtotalRow = this.ip_data_all.result.FileDownloadedFromUrls.length;
+      this.item_type.downloaded = true;
+    } else {
+      this.downloadedtotalRow = 0;
+    }
+
+    if (this.ip_data_all.result.FileAccessedUrls) {
+      this.ip_data_all.result.FileAccessedUrls.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Dangerous";
+            break;
+          case "Orange":
+            item.Zone_hoohoolab = "";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Good";
+            break;
+          default:
+            break;
+        }
+      });
+      this.accessedtotalRow = this.ip_data_all.result.FileAccessedUrls.length;
+      this.item_type.accessed = true;
+    } else {
+      this.accessedtotalRow = 0;
+    }
+    if (this.ip_data_all.result.FileStartedObjects) {
+      this.ip_data_all.result.FileStartedObjects.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Malware";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Clean";
+            break;
+          default:
+            break;
+        }
+      });
+      this.starttotalRow = this.ip_data_all.result.FileStartedObjects.length;
+      this.item_type.start = true;
+    } else {
+      this.starttotalRow = 0;
+    }
+    if (this.ip_data_all.result.FileStartedBy) {
+      this.ip_data_all.result.FileStartedBy.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Malware";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Clean";
+            break;
+          default:
+            break;
+        }
+      });
+      this.wastotalRow = this.hash_data.FileStartedBy.length;
+      this.item_type.was = true;
+    } else {
+      this.wastotalRow = 0;
+    }
+    if (this.ip_data_all.result.FileDownloadedObjects) {
+      this.ip_data_all.result.FileDownloadedObjects.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Malware";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Clean";
+            break;
+          default:
+            break;
+        }
+      });
+      this.objdownloadedtotalRow = this.ip_data_all.result.FileDownloadedObjects.length;
+      this.item_type.following = true;
+    } else {
+      this.objdownloadedtotalRow = 0;
+    }
+    if (this.ip_data_all.result.FileDownloadedBy) {
+      this.ip_data_all.result.FileDownloadedBy.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Malware";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Clean";
+            break;
+          default:
+            break;
+        }
+      });
+      this.objwastotalRow = this.ip_data_all.result.FileDownloadedBy.length;
+      this.item_type.objects = true;
+    } else {
+      this.objwastotalRow = 0;
+    }
+    this.hash_data = this.ip_data_all.result;
   },
-  mounted() {
+  mounted () {
     // console.log(this.$route.query.name);
   },
+  filters: {
+    datefrm: function (el) {
+      return moment(el).format("YYYY-MM-DD HH:mm:ss");
+    }
+  },
   methods: {
-    intelligence() {
+    downloadedpageChange (pInfo) {
+      if (this.hash_data.FileDownloadedFromUrls) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FileDownloadedFromUrls.length) {
+          end = this.hash_data.FileDownloadedFromUrls.length;
+        }
+        this.downloadedpageArr.splice(0, this.downloadedpageArr.length);
+        for (let i = start; i < end; i++) {
+          this.downloadedpageArr.push(this.hash_data.FileDownloadedFromUrls[i]);
+        }
+      }
+    },
+    accessedpageChange (pInfo) {
+      if (this.hash_data.FileAccessedUrls) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FileAccessedUrls.length) {
+          end = this.hash_data.FileAccessedUrls.length;
+        }
+        this.accessedpageArr.splice(0, this.accessedpageArr.length);
+        for (let i = start; i < end; i++) {
+          this.accessedpageArr.push(this.hash_data.FileAccessedUrls[i]);
+        }
+      }
+    },
+    startpageChange (pInfo) {
+      if (this.hash_data.FileStartedObjects) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FileStartedObjects.length) {
+          end = this.hash_data.FileStartedObjects.length;
+        }
+        this.startpageArr.splice(0, this.startpageArr.length);
+        for (let i = start; i < end; i++) {
+          this.startpageArr.push(this.hash_data.FileStartedObjects[i]);
+        }
+      }
+    },
+    waspageChange (pInfo) {
+      if (this.hash_data.FileStartedBy) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FileStartedBy.length) {
+          end = this.hash_data.FileStartedBy.length;
+        }
+        this.waspageArr.splice(0, this.waspageArr.length);
+        for (let i = start; i < end; i++) {
+          this.waspageArr.push(this.hash_data.FileStartedBy[i]);
+        }
+      }
+    },
+    objdownloadedpageChange (pInfo) {
+      if (this.hash_data.FileDownloadedObjects) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FileDownloadedObjects.length) {
+          end = this.hash_data.FileDownloadedObjects.length;
+        }
+        this.objdownloadedpageArr.splice(0, this.objdownloadedpageArr.length);
+        for (let i = start; i < end; i++) {
+          this.objdownloadedpageArr.push(
+            this.hash_data.FileDownloadedObjects[i]
+          );
+        }
+      } else {
+        this.objdownloadedpageArr = [];
+      }
+    },
+    objwaspageChange (pInfo) {
+      if (this.hash_data.FileDownloadedBy) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FileDownloadedBy.length) {
+          end = this.hash_data.FileDownloadedBy.length;
+        }
+        this.objwaspageArr.splice(0, this.objwaspageArr.length);
+        for (let i = start; i < end; i++) {
+          this.objwaspageArr.push(this.hash_data.FileDownloadedBy[i]);
+        }
+      }
+    },
+    FilenamespageChange (pInfo) {
+      if (this.hash_data.FileNames) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FileNames.length) {
+          end = this.hash_data.FileNames.length;
+        }
+        this.FilenamespageArr.splice(0, this.FilenamespageArr.length);
+        for (let i = start; i < end; i++) {
+          this.FilenamespageArr.push(this.hash_data.FileNames[i]);
+        }
+      }
+    },
+    FilePathspageChange (pInfo) {
+      if (this.hash_data.FilePaths) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.hash_data.FilePaths.length) {
+          end = this.hash_data.FilePaths.length;
+        }
+        this.FilePathspageArr.splice(0, this.FilePathspageArr.length);
+        for (let i = start; i < end; i++) {
+          this.FilePathspageArr.push(this.hash_data.FilePaths[i]);
+        }
+      }
+    },
+    refresh () {
+      this.loading = true;
       this.$axios
-        // .get("https://47.105.196.251/intelligence/extension", {
-        .get("/intelligence/extension", {
+        // .get("https://47.105.196.251/site/extension", {
+        .get("/site/extension", {
           params: {
+            reload: true,
             indicator: this.$route.query.name
           }
         })
-        //     .get("/intelligence/extension")
         .then(response => {
           if (response.data.status == "success") {
-            switch (response.data.data.result.Zone) {
+            setTimeout(() => {
+              this.loading = false;
+            }, 1000);
+            this.ip_data_all = response.data.data;
+            switch (this.ip_data_all.result.Zone) {
               case "Red":
-                response.data.data.result.Zone_hoohoolab = "Malware";
+                this.ip_data_all.result.Zone_hoohoolab = "Malware";
                 break;
               case "Yellow":
-                response.data.data.result.Zone_hoohoolab = "Adware and other";
+                this.ip_data_all.result.Zone_hoohoolab = "Adware and other";
                 break;
               case "Grey":
-                response.data.data.result.Zone_hoohoolab = "Not categorized";
+                this.ip_data_all.result.Zone_hoohoolab = "Not categorized";
                 break;
               case "Green":
-                response.data.data.result.Zone_hoohoolab = "Clean";
+                this.ip_data_all.result.Zone_hoohoolab = "Clean";
                 break;
               default:
                 break;
             }
-            if (response.data.data.result.DetectionsInfo) {
+            if (this.ip_data_all.result.DetectionsInfo) {
               this.item_type.detection = true;
             }
-            if (response.data.data.result.FileCertificates) {
+            if (this.ip_data_all.result.FileCertificates) {
               this.item_type.signatures = true;
             }
-            if (response.data.data.result.FileNames) {
+            if (this.ip_data_all.result.FileNames) {
               this.item_type.names = true;
-              this.FilenamestotalRow =
-                response.data.data.result.FileNames.length;
+              this.FilenamestotalRow = this.ip_data_all.result.FileNames.length;
             }
-            if (response.data.data.result.FilePaths) {
-              this.FilePathstotalRow =
-                response.data.data.result.FilePaths.length;
+            if (this.ip_data_all.result.FilePaths) {
+              this.FilePathstotalRow = this.ip_data_all.result.FilePaths.length;
               this.item_type.paths = true;
             }
-            if (response.data.data.result.FileDownloadedFromUrls) {
-              response.data.data.result.FileDownloadedFromUrls.forEach(item => {
+            if (this.ip_data_all.result.FileDownloadedFromUrls) {
+              this.ip_data_all.result.FileDownloadedFromUrls.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Dangerous";
@@ -836,15 +1393,14 @@ export default {
                     break;
                 }
               });
-              this.downloadedtotalRow =
-                response.data.data.result.FileDownloadedFromUrls.length;
+              this.downloadedtotalRow = this.ip_data_all.result.FileDownloadedFromUrls.length;
               this.item_type.downloaded = true;
             } else {
               this.downloadedtotalRow = 0;
             }
 
-            if (response.data.data.result.FileAccessedUrls) {
-              response.data.data.result.FileAccessedUrls.forEach(item => {
+            if (this.ip_data_all.result.FileAccessedUrls) {
+              this.ip_data_all.result.FileAccessedUrls.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Dangerous";
@@ -865,14 +1421,13 @@ export default {
                     break;
                 }
               });
-              this.accessedtotalRow =
-                response.data.data.result.FileAccessedUrls.length;
+              this.accessedtotalRow = this.ip_data_all.result.FileAccessedUrls.length;
               this.item_type.accessed = true;
             } else {
               this.accessedtotalRow = 0;
             }
-            if (response.data.data.result.FileStartedObjects) {
-              response.data.data.result.FileStartedObjects.forEach(item => {
+            if (this.ip_data_all.result.FileStartedObjects) {
+              this.ip_data_all.result.FileStartedObjects.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Malware";
@@ -890,14 +1445,13 @@ export default {
                     break;
                 }
               });
-              this.starttotalRow =
-                response.data.data.result.FileStartedObjects.length;
+              this.starttotalRow = this.ip_data_all.result.FileStartedObjects.length;
               this.item_type.start = true;
             } else {
               this.starttotalRow = 0;
             }
-            if (response.data.data.result.FileStartedBy) {
-              response.data.data.result.FileStartedBy.forEach(item => {
+            if (this.ip_data_all.result.FileStartedBy) {
+              this.ip_data_all.result.FileStartedBy.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Malware";
@@ -920,8 +1474,8 @@ export default {
             } else {
               this.wastotalRow = 0;
             }
-            if (response.data.data.result.FileDownloadedObjects) {
-              response.data.data.result.FileDownloadedObjects.forEach(item => {
+            if (this.ip_data_all.result.FileDownloadedObjects) {
+              this.ip_data_all.result.FileDownloadedObjects.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Malware";
@@ -939,14 +1493,13 @@ export default {
                     break;
                 }
               });
-              this.objdownloadedtotalRow =
-                response.data.data.result.FileDownloadedObjects.length;
+              this.objdownloadedtotalRow = this.ip_data_all.result.FileDownloadedObjects.length;
               this.item_type.following = true;
             } else {
               this.objdownloadedtotalRow = 0;
             }
-            if (response.data.data.result.FileDownloadedBy) {
-              response.data.data.result.FileDownloadedBy.forEach(item => {
+            if (this.ip_data_all.result.FileDownloadedBy) {
+              this.ip_data_all.result.FileDownloadedBy.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Malware";
@@ -964,145 +1517,17 @@ export default {
                     break;
                 }
               });
-              this.objwastotalRow =
-                response.data.data.result.FileDownloadedBy.length;
+              this.objwastotalRow = this.ip_data_all.result.FileDownloadedBy.length;
               this.item_type.objects = true;
             } else {
               this.objwastotalRow = 0;
             }
-            this.hash_data = response.data.data.result;
-            setTimeout(() => {
-              this.loading = false;
-            }, 4000);
+            this.hash_data = this.ip_data_all.result;
           }
         })
         .catch(error => {
           console.log(error);
         });
-    },
-    downloadedpageChange(pInfo) {
-      if (this.hash_data.FileDownloadedFromUrls) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FileDownloadedFromUrls.length) {
-          end = this.hash_data.FileDownloadedFromUrls.length;
-        }
-        this.downloadedpageArr.splice(0, this.downloadedpageArr.length);
-        for (let i = start; i < end; i++) {
-          this.downloadedpageArr.push(this.hash_data.FileDownloadedFromUrls[i]);
-        }
-      }
-    },
-    accessedpageChange(pInfo) {
-      if (this.hash_data.FileAccessedUrls) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FileAccessedUrls.length) {
-          end = this.hash_data.FileAccessedUrls.length;
-        }
-        this.accessedpageArr.splice(0, this.accessedpageArr.length);
-        for (let i = start; i < end; i++) {
-          this.accessedpageArr.push(this.hash_data.FileAccessedUrls[i]);
-        }
-      }
-    },
-    startpageChange(pInfo) {
-      if (this.hash_data.FileStartedObjects) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FileStartedObjects.length) {
-          end = this.hash_data.FileStartedObjects.length;
-        }
-        this.startpageArr.splice(0, this.startpageArr.length);
-        for (let i = start; i < end; i++) {
-          this.startpageArr.push(this.hash_data.FileStartedObjects[i]);
-        }
-      }
-    },
-    waspageChange(pInfo) {
-      if (this.hash_data.FileStartedBy) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FileStartedBy.length) {
-          end = this.hash_data.FileStartedBy.length;
-        }
-        this.waspageArr.splice(0, this.waspageArr.length);
-        for (let i = start; i < end; i++) {
-          this.waspageArr.push(this.hash_data.FileStartedBy[i]);
-        }
-      }
-    },
-    objdownloadedpageChange(pInfo) {
-      if (this.hash_data.FileDownloadedObjects) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FileDownloadedObjects.length) {
-          end = this.hash_data.FileDownloadedObjects.length;
-        }
-        this.objdownloadedpageArr.splice(0, this.objdownloadedpageArr.length);
-        for (let i = start; i < end; i++) {
-          this.objdownloadedpageArr.push(
-            this.hash_data.FileDownloadedObjects[i]
-          );
-        }
-      } else {
-        this.objdownloadedpageArr = [];
-      }
-    },
-    objwaspageChange(pInfo) {
-      if (this.hash_data.FileDownloadedBy) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FileDownloadedBy.length) {
-          end = this.hash_data.FileDownloadedBy.length;
-        }
-        this.objwaspageArr.splice(0, this.objwaspageArr.length);
-        for (let i = start; i < end; i++) {
-          this.objwaspageArr.push(this.hash_data.FileDownloadedBy[i]);
-        }
-      }
-    },
-    FilenamespageChange(pInfo) {
-      if (this.hash_data.FileNames) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FileNames.length) {
-          end = this.hash_data.FileNames.length;
-        }
-        this.FilenamespageArr.splice(0, this.FilenamespageArr.length);
-        for (let i = start; i < end; i++) {
-          this.FilenamespageArr.push(this.hash_data.FileNames[i]);
-        }
-      }
-    },
-    FilePathspageChange(pInfo) {
-      if (this.hash_data.FilePaths) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.hash_data.FilePaths.length) {
-          end = this.hash_data.FilePaths.length;
-        }
-        this.FilePathspageArr.splice(0, this.FilePathspageArr.length);
-        for (let i = start; i < end; i++) {
-          this.FilePathspageArr.push(this.hash_data.FilePaths[i]);
-        }
-      }
     }
   }
 };

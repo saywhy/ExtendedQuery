@@ -1,308 +1,435 @@
 <template>
-    <div class="url" v-loading.fullscreen.lock="loading" v-cloak>
-        <div class="title">URL查询</div>
-        <div class="container">
-            <div class="report clearfix">
-                <div class="report_top clearfix">
-                    <div class="report_top_title_box">
-                        <div class="report_top_title_box_left">
-                            <span class="report_top_title">Report for URL: </span>
-                            <span class="report_top_name" :class="{red:url_data.Zone=='Red',yellow:url_data.Zone=='Yellow',grey:url_data.Zone=='Grey',green:url_data.Zone=='Green'}">{{url_data.Zone_hoohoolab}}</span>
-                        </div>
-                        <!-- <div class="report_top_title_box_right">
+  <div class="url"
+       v-loading.fullscreen.lock="loading"
+       v-cloak>
+    <div class="title">
+      URL查询
+      <span class="data_source"
+            v-if="ip_data_all.source=='offline'">
+        <span>数据来自本地缓存</span>
+      </span>
+      <span class="info_img"
+            v-if="ip_data_all.source=='offline'">
+        <el-tooltip class="item"
+                    effect="dark"
+                    :content="ip_data_all.addtime*1000 | datefrm"
+                    placement="bottom">
+          <img src="../common/image/ip/info.png"
+               alt="">
+        </el-tooltip>
+      </span>
+      <button v-if="ip_data_all.source=='offline'"
+              class="btn_now"
+              @click="refresh">立即刷新</button>
+    </div>
+    <div class="container">
+      <div class="report clearfix">
+        <div class="report_top clearfix">
+          <div class="report_top_title_box">
+            <div class="report_top_title_box_left">
+              <span class="report_top_title">Report for URL: </span>
+              <span class="report_top_name"
+                    :class="{red:url_data.Zone=='Red',yellow:url_data.Zone=='Yellow',grey:url_data.Zone=='Grey',green:url_data.Zone=='Green'}">{{url_data.Zone_hoohoolab}}</span>
+            </div>
+            <!-- <div class="report_top_title_box_right">
                             <img class="report_top_title_box_right_img" src="../common/image/ip/a.png" alt="">
                             <span class="report_top_title_box_right_span">Copy Request</span>
                             <img class="report_top_title_box_right_img" src="../common/image/ip/down.png" alt="">
                             <span class="report_top_title_box_right_span">Export all results</span>
                         </div> -->
-                    </div>
-                    <div class="report_top_bom">
-                        <img src="" alt="">
-                        <span>{{indicator}}</span>
-                    </div>
-                </div>
-                <div class="report_mid">
-                    <el-row class="report_mid_item">
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">IPV4 Count</p>
-                            <p class="report_mid_item_col_value">{{url_data.UrlGeneralInfo.Ipv4Count}}</p>
-                            <p class="report_mid_item_col_name">Domain</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.whois">
-                                    {{url_data.UrlDomainWhoIs.DomainName}}
-                                </span>
-                            </p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Files Count</p>
-                            <p class="report_mid_item_col_value">{{url_data.UrlGeneralInfo.FilesCount}}</p>
-                            <p class="report_mid_item_col_name">Registration organization</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.whois">
-                                    {{url_data.UrlDomainWhoIs.Contacts[0].Organization}}
-                                </span>
-                            </p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Create</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.whois">
-                                    {{url_data.UrlDomainWhoIs.Created}}
-                                </span>
-                            </p>
-                            <p class="report_mid_item_col_name">Registrar Name</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.whois">
-                                    {{url_data.UrlDomainWhoIs.Registrar.Info}}
-                                </span>
-                            </p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Expires</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.whois">
-                                    {{url_data.UrlDomainWhoIs.Expires}}
-                                </span>
-                            </p>
-                        </el-col>
-                    </el-row>
-                </div>
-                <div class="report_bom">
-                    <span>Categories:</span>
-                    <span v-for="item in url_data.UrlGeneralInfo.Categories">
-                        <img class="report_bom_img" src="../common/image/ip/span.png" alt="">
-                        <span class="report_bom_span">{{item}}</span>
-                    </span>
-                </div>
-            </div>
-            <div class="whois clearfix" v-if="item_type.whois">
-                <div class="whois_top ">
-                    <span class="whois_top_name">WHOIS</span>
-                    <!-- <img class="whois_top_img" src="../common/image/ip/info.png" alt=""> -->
-                </div>
-                <div class="whois_mid ">
-                    <el-row class="whois_mid_item">
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">Domain Name</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.DomainName}}</p>
-                            <p class="whois_mid_item_col_name">Paid Until</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Expires}}</p>
-                        </el-col>
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">Domain Status</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.DomainStatus[0]}}</p>
-                            <p class="whois_mid_item_col_name">Registrar Ifro</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Registrar.Info}}</p>
-                        </el-col>
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">Created</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Created}}</p>
-                            <p class="whois_mid_item_col_name">IANA ID</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Registrar.IanaId}}</p>
-                        </el-col>
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">Updated</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Updated}}</p>
-                            <p class="whois_mid_item_col_name">Email</p>
-                            <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Registrar.Email}}</p>
-                        </el-col>
-                    </el-row>
-                </div>
-                <div class="whois_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Contracts</th>
-                            <th>Name</th>
-                            <th>Organization</th>
-                            <th>Address</th>
-                            <th>Phone/Fax</th>
-                            <th style="padding-right:36px;">Email</th>
-                        </tr>
-                        <tr v-for="item in whoispageArr">
-                            <td style="padding-left:36px;" :title="item.ContactType">{{item.ContactType}}</td>
-                            <td :title="item.Name">{{item.Name?item.Name:'-'}}</td>
-                            <td :title="item.Organization"> {{item.Organization?item.Organization:'-'}}</td>
-                            <td>
-                                <span>{{item.CountryCode}}</span>
-                                <span>;</span>
-                                <span>{{item.State}}</span>
-                            </td>
-                            <td>
-                                <p style="height:28px;line-height:40px;">
-                                    <span>{{item.Phone?item.Phone:'-'}}</span>
-                                    <span>Phone</span>
-                                </p>
-                                <p style="height:28px;line-height:20px;">
-                                    <span>{{item.Fax?item.Fax:'-'}}</span>
-                                    <span>Fax</span>
-                                </p>
-                            </td>
-                            <td style="padding-right:36px;" :title="item.Email">
-                                {{item.Email}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="whois_page" :total-row="whoistotalRow" :page-size-menu='false' @page-change="whoispageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <div class="dns" v-if="item_type.dns">
-                <div class="dns_top ">
-                    <span class="dns_top_name">DNS Resolutions for Domain</span>
-                    <!-- <img class="dns_top_img" src="../common/image/ip/info.png" alt=""> -->
-                    <!-- <span class="dns_top_right">
+          </div>
+          <div class="report_top_bom">
+            <img src=""
+                 alt="">
+            <span>{{indicator}}</span>
+          </div>
+        </div>
+        <div class="report_mid">
+          <el-row class="report_mid_item">
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">IPV4 Count</p>
+              <p class="report_mid_item_col_value">{{url_data.UrlGeneralInfo.Ipv4Count}}</p>
+              <p class="report_mid_item_col_name">Domain</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.whois">
+                  {{url_data.UrlDomainWhoIs.DomainName}}
+                </span>
+              </p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Files Count</p>
+              <p class="report_mid_item_col_value">{{url_data.UrlGeneralInfo.FilesCount}}</p>
+              <p class="report_mid_item_col_name">Registration organization</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.whois">
+                  {{url_data.UrlDomainWhoIs.Contacts[0].Organization}}
+                </span>
+              </p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Create</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.whois">
+                  {{url_data.UrlDomainWhoIs.Created}}
+                </span>
+              </p>
+              <p class="report_mid_item_col_name">Registrar Name</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.whois">
+                  {{url_data.UrlDomainWhoIs.Registrar.Info}}
+                </span>
+              </p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Expires</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.whois">
+                  {{url_data.UrlDomainWhoIs.Expires}}
+                </span>
+              </p>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="report_bom">
+          <span>Categories:</span>
+          <span v-for="item in url_data.UrlGeneralInfo.Categories">
+            <img class="report_bom_img"
+                 src="../common/image/ip/span.png"
+                 alt="">
+            <span class="report_bom_span">{{item}}</span>
+          </span>
+        </div>
+      </div>
+      <div class="whois clearfix"
+           v-if="item_type.whois">
+        <div class="whois_top ">
+          <span class="whois_top_name">WHOIS</span>
+          <!-- <img class="whois_top_img" src="../common/image/ip/info.png" alt=""> -->
+        </div>
+        <div class="whois_mid ">
+          <el-row class="whois_mid_item">
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">Domain Name</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.DomainName}}</p>
+              <p class="whois_mid_item_col_name">Paid Until</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Expires}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">Domain Status</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.DomainStatus[0]}}</p>
+              <p class="whois_mid_item_col_name">Registrar Ifro</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Registrar.Info}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">Created</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Created}}</p>
+              <p class="whois_mid_item_col_name">IANA ID</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Registrar.IanaId}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">Updated</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Updated}}</p>
+              <p class="whois_mid_item_col_name">Email</p>
+              <p class="whois_mid_item_col_value">{{url_data.UrlDomainWhoIs.Registrar.Email}}</p>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="whois_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Contracts</th>
+              <th>Name</th>
+              <th>Organization</th>
+              <th>Address</th>
+              <th>Phone/Fax</th>
+              <th style="padding-right:36px;">Email</th>
+            </tr>
+            <tr v-for="item in whoispageArr">
+              <td style="padding-left:36px;"
+                  :title="item.ContactType">{{item.ContactType}}</td>
+              <td :title="item.Name">{{item.Name?item.Name:'-'}}</td>
+              <td :title="item.Organization"> {{item.Organization?item.Organization:'-'}}</td>
+              <td>
+                <span>{{item.CountryCode}}</span>
+                <span>;</span>
+                <span>{{item.State}}</span>
+              </td>
+              <td>
+                <p style="height:28px;line-height:40px;">
+                  <span>{{item.Phone?item.Phone:'-'}}</span>
+                  <span>Phone</span>
+                </p>
+                <p style="height:28px;line-height:20px;">
+                  <span>{{item.Fax?item.Fax:'-'}}</span>
+                  <span>Fax</span>
+                </p>
+              </td>
+              <td style="padding-right:36px;"
+                  :title="item.Email">
+                {{item.Email}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="whois_page"
+                  :total-row="whoistotalRow"
+                  :page-size-menu='false'
+                  @page-change="whoispageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <div class="dns"
+           v-if="item_type.dns">
+        <div class="dns_top ">
+          <span class="dns_top_name">DNS Resolutions for Domain</span>
+          <!-- <img class="dns_top_img" src="../common/image/ip/info.png" alt=""> -->
+          <!-- <span class="dns_top_right">
                         <img class="dns_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="dns_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="dns_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 100px;">Threat Score</th>
-                            <th style="width: 100px;">Hits(≈)</th>
-                            <th>IP</th>
-                            <th>First Resolved</th>
-                            <th>Last Resolved</th>
-                            <th>Peak Date</th>
-                            <th style="padding-right:36px;">Daily Peak(≈)</th>
-                        </tr>
-                        <tr v-for="item in DNSpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.ThreatScore">{{item.ThreatScore}}</td>
-                            <td :title="item.HitsCount">{{item.HitsCount}}</td>
-                            <td :title="item.Ip">{{item.Ip}}</td>
-                            <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
-                            <td :title="item.LastSeen">{{item.LastSeen}}</td>
-                            <td :title="item.PeakDate">{{item.PeakDate}}</td>
-                            <td style="padding-right:36px;" :title="item.DailyPeak">{{item.DailyPeak}}</td>
-                        </tr>
-                    </table>
-                    <v-page class="dns_page" :total-row="DNStotalRow" :page-size-menu='false' @page-change="DNSpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <div class="files" v-if="item_type.files">
-                <div class="files_top ">
-                    <span class="files_top_name">Files Download form requested URL</span>
-                    <!-- <img class="files_top_img" src="../common/image/ip/info.png" alt=""> -->
-                    <!-- <span class="files_top_right">
+        </div>
+        <div class="dns_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 100px;">Threat Score</th>
+              <th style="width: 100px;">Hits(≈)</th>
+              <th>IP</th>
+              <th>First Resolved</th>
+              <th>Last Resolved</th>
+              <th>Peak Date</th>
+              <th style="padding-right:36px;">Daily Peak(≈)</th>
+            </tr>
+            <tr v-for="item in DNSpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.ThreatScore">{{item.ThreatScore}}</td>
+              <td :title="item.HitsCount">{{item.HitsCount}}</td>
+              <td :title="item.Ip">{{item.Ip}}</td>
+              <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
+              <td :title="item.LastSeen">{{item.LastSeen}}</td>
+              <td :title="item.PeakDate">{{item.PeakDate}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DailyPeak">{{item.DailyPeak}}</td>
+            </tr>
+          </table>
+          <v-page class="dns_page"
+                  :total-row="DNStotalRow"
+                  :page-size-menu='false'
+                  @page-change="DNSpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <div class="files"
+           v-if="item_type.files">
+        <div class="files_top ">
+          <span class="files_top_name">Files Download form requested URL</span>
+          <!-- <img class="files_top_img" src="../common/image/ip/info.png" alt=""> -->
+          <!-- <span class="files_top_right">
                         <img class="files_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="files_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="files_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 100px;">Hits(≈)</th>
-                            <th style="width: 300px;">Files MD5</th>
-                            <th>First Download</th>
-                            <th>Last Download</th>
-                            <th style="padding-right:36px;">Detection name</th>
-                        </tr>
-                        <tr v-for="item in filespageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.DownloadHitsCount">{{item.DownloadHitsCount}}</td>
-                            <td style="width: 300px;" :title="item.Md5">{{item.Md5}}</td>
-                            <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
-                            <td :title="item.LastSeen">{{item.LastSeen}}</td>
-                            <td style="padding-right:36px;" :title="item.DetectionName">{{item.DetectionName}}</td>
-                        </tr>
-                    </table>
-                    <v-page class="files_page" :total-row="filestotalRow" :page-size-menu='false' @page-change="filespageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <div class="requested" v-if="item_type.requested">
-                <div class="requested_top ">
-                    <span class="requested_top_name">Files accessed requested URL</span>
-                    <!-- <img class="requested_top_img" src="../common/image/ip/info.png" alt="">
+        </div>
+        <div class="files_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 100px;">Hits(≈)</th>
+              <th style="width: 300px;">Files MD5</th>
+              <th>First Download</th>
+              <th>Last Download</th>
+              <th style="padding-right:36px;">Detection name</th>
+            </tr>
+            <tr v-for="item in filespageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.DownloadHitsCount">{{item.DownloadHitsCount}}</td>
+              <td style="width: 300px;"
+                  :title="item.Md5">{{item.Md5}}</td>
+              <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
+              <td :title="item.LastSeen">{{item.LastSeen}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DetectionName">{{item.DetectionName}}</td>
+            </tr>
+          </table>
+          <v-page class="files_page"
+                  :total-row="filestotalRow"
+                  :page-size-menu='false'
+                  @page-change="filespageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <div class="requested"
+           v-if="item_type.requested">
+        <div class="requested_top ">
+          <span class="requested_top_name">Files accessed requested URL</span>
+          <!-- <img class="requested_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="requested_top_right">
                         <img class="requested_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="requested_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="requested_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 100px;">Hits(≈)</th>
-                            <th style="width: 300px;">Files MD5</th>
-                            <th>First Accessed</th>
-                            <th>Last Accessed</th>
-                            <th style="padding-right:36px;">Detection name</th>
-                        </tr>
-                        <tr v-for="item in requestedpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.AccessHitsCount">{{item.AccessHitsCount}}</td>
-                            <td style="width: 300px;" :title="item.Md5">{{item.Md5}}</td>
-                            <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
-                            <td :title="item.LastSeen">{{item.LastSeen}}</td>
-                            <td style="padding-right:36px;" :title="item.DetectionName">{{item.DetectionName}}</td>
-                        </tr>
-                    </table>
-                    <v-page class="requested_page" :total-row="requestedtotalRow" :page-size-menu='false' @page-change="requestedpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <div class="url" v-if="item_type.url">
-                <div class="url_top ">
-                    <span class="url_top_name">URL Marks</span>
-                    <!-- <img class="url_top_img" src="../common/image/ip/info.png" alt="">
+        </div>
+        <div class="requested_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 100px;">Hits(≈)</th>
+              <th style="width: 300px;">Files MD5</th>
+              <th>First Accessed</th>
+              <th>Last Accessed</th>
+              <th style="padding-right:36px;">Detection name</th>
+            </tr>
+            <tr v-for="item in requestedpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.AccessHitsCount">{{item.AccessHitsCount}}</td>
+              <td style="width: 300px;"
+                  :title="item.Md5">{{item.Md5}}</td>
+              <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
+              <td :title="item.LastSeen">{{item.LastSeen}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DetectionName">{{item.DetectionName}}</td>
+            </tr>
+          </table>
+          <v-page class="requested_page"
+                  :total-row="requestedtotalRow"
+                  :page-size-menu='false'
+                  @page-change="requestedpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <div class="url"
+           v-if="item_type.url">
+        <div class="url_top ">
+          <span class="url_top_name">URL Marks</span>
+          <!-- <img class="url_top_img" src="../common/image/ip/info.png" alt="">
                     <span class="url_top_right">
                         <img class="url_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="url_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="url_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th>Type</th>
-                            <th style="width: 600px;">Mask</th>
-                            <th style="padding-right:36px;">Feeds</th>
-                        </tr>
-                        <tr v-for="item in urlpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.MaskType">{{item.MaskType}}</td>
-                            <td :title="item.NormalizedMask">{{item.NormalizedMask}}</td>
-                            <td style="padding-right:36px;" :title="item.FeedNames">{{item.FeedNames}}</td>
-                        </tr>
-                    </table>
-                    <v-page class="url_page" :total-row="urltotalRow" :page-size-menu='false' @page-change="urlpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
         </div>
+        <div class="url_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th>Type</th>
+              <th style="width: 600px;">Mask</th>
+              <th style="padding-right:36px;">Feeds</th>
+            </tr>
+            <tr v-for="item in urlpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.MaskType">{{item.MaskType}}</td>
+              <td :title="item.NormalizedMask">{{item.NormalizedMask}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.FeedNames">{{item.FeedNames}}</td>
+            </tr>
+          </table>
+          <v-page class="url_page"
+                  :total-row="urltotalRow"
+                  :page-size-menu='false'
+                  @page-change="urlpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 <style  lang="less">
 .url {
@@ -335,6 +462,34 @@
     line-height: 64px;
     font-size: 20px;
     font-weight: 600;
+    position: relative;
+    .data_source {
+      font-size: 14px;
+      position: absolute;
+      right: 200px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .info_img {
+      position: absolute;
+      right: 150px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+    .btn_now {
+      cursor: pointer;
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0070ff;
+      font-size: 14px;
+      color: #fff;
+      width: 80px;
+      border-radius: 4px;
+      height: 32px;
+    }
   }
   .container {
     padding: 0 48px;
@@ -645,11 +800,13 @@
 }
 </style>
 <script>
+import moment from "moment";
 export default {
   name: "ip",
-  data() {
+  data () {
     return {
       url_data: "",
+      ip_data_all: "",
       indicator: "",
       whoistotalRow: 100,
       whoispageArr: [],
@@ -671,168 +828,152 @@ export default {
       loading: true
     };
   },
-  created() {
-    console.log(this.$route.query.name);
+  created () {
     this.indicator = this.$route.query.name;
+    this.ip_data_all = JSON.parse(sessionStorage.getItem("IpGeneralInfo"));
     this.loading = true;
-    this.intelligence();
+    setTimeout(() => {
+      this.loading = false;
+    }, 1000);
+    switch (this.ip_data_all.result.Zone) {
+      case "Red":
+        this.ip_data_all.result.Zone_hoohoolab = "Dangerous";
+        break;
+      case "Orange":
+        this.ip_data_all.result.Zone_hoohoolab = "";
+        break;
+      case "Yellow":
+        this.ip_data_all.result.Zone_hoohoolab = "Adware and other";
+        break;
+      case "Grey":
+        this.ip_data_all.result.Zone_hoohoolab = "Not categorized";
+        break;
+      case "Green":
+        this.ip_data_all.result.Zone_hoohoolab = "Good";
+        break;
+      default:
+        break;
+    }
+    if (this.ip_data_all.result.UrlDomainWhoIs) {
+      this.whoistotalRow = this.ip_data_all.result.UrlDomainWhoIs.Contacts.length;
+      this.item_type.whois = true;
+    } else {
+      this.whoistotalRow = 0;
+    }
+    if (this.ip_data_all.result.DomainDnsResolutions) {
+      this.ip_data_all.result.DomainDnsResolutions.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Dangerous";
+            break;
+          case "Orange":
+            item.Zone_hoohoolab = "";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Good";
+            break;
+          default:
+            break;
+        }
+      });
+      this.DNStotalRow = this.ip_data_all.result.DomainDnsResolutions.length;
+      this.item_type.dns = true;
+    } else {
+      this.DNStotalRow = 0;
+    }
+    if (this.ip_data_all.result.FilesDownloaded) {
+      this.ip_data_all.result.FilesDownloaded.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Malware";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Clean";
+            break;
+          default:
+            break;
+        }
+      });
+      this.filestotalRow = this.ip_data_all.result.FilesDownloaded.length;
+      this.item_type.files = true;
+    } else {
+      this.filestotalRow = 0;
+    }
+    if (this.ip_data_all.result.FilesAccessed) {
+      this.ip_data_all.result.FilesAccessed.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Malware";
+            break;
+          case "Orange":
+            item.Zone_hoohoolab = "";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Good";
+            break;
+          default:
+            break;
+        }
+      });
+      this.requestedtotalRow = this.ip_data_all.result.FilesAccessed.length;
+      this.item_type.requested = true;
+    } else {
+      this.requestedtotalRow = 0;
+    }
+    if (this.ip_data_all.result.FeedMasks) {
+      this.ip_data_all.result.FeedMasks.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Dangerous";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Clean";
+            break;
+          default:
+            break;
+        }
+      });
+      this.urltotalRow = this.ip_data_all.result.FeedMasks.length;
+      this.item_type.url = true;
+    } else {
+      this.urltotalRow = 0;
+    }
+    this.url_data = this.ip_data_all.result;
   },
-  mounted() {
+  mounted () {
     // console.log(this.$route.query.name);
   },
+  filters: {
+    datefrm: function (el) {
+      return moment(el).format("YYYY-MM-DD HH:mm:ss");
+    }
+  },
   methods: {
-    intelligence() {
-      this.$axios
-        // .get("https://47.105.196.251/intelligence/extension", {
-        .get("/intelligence/extension", {
-          params: {
-            indicator: this.$route.query.name
-          }
-        })
-        .then(response => {
-          if (response.data.status == "success") {
-            switch (response.data.data.result.Zone) {
-              case "Red":
-                response.data.data.result.Zone_hoohoolab = "Dangerous";
-                break;
-              case "Orange":
-                response.data.data.result.Zone_hoohoolab = "";
-                break;
-              case "Yellow":
-                response.data.data.result.Zone_hoohoolab = "Adware and other";
-                break;
-              case "Grey":
-                response.data.data.result.Zone_hoohoolab = "Not categorized";
-                break;
-              case "Green":
-                response.data.data.result.Zone_hoohoolab = "Good";
-                break;
-              default:
-                break;
-            }
-            if (response.data.data.result.UrlDomainWhoIs) {
-              this.whoistotalRow =
-                response.data.data.result.UrlDomainWhoIs.Contacts.length;
-              this.item_type.whois = true;
-            } else {
-              this.whoistotalRow = 0;
-            }
-            if (response.data.data.result.DomainDnsResolutions) {
-              response.data.data.result.DomainDnsResolutions.forEach(item => {
-                switch (item.Zone) {
-                  case "Red":
-                    item.Zone_hoohoolab = "Dangerous";
-                    break;
-                  case "Orange":
-                    item.Zone_hoohoolab = "";
-                    break;
-                  case "Grey":
-                    item.Zone_hoohoolab = "Not categorized";
-                    break;
-                  case "Yellow":
-                    item.Zone_hoohoolab = "Adware and other";
-                    break;
-                  case "Green":
-                    item.Zone_hoohoolab = "Good";
-                    break;
-                  default:
-                    break;
-                }
-              });
-              this.DNStotalRow =
-                response.data.data.result.DomainDnsResolutions.length;
-              this.item_type.dns = true;
-            } else {
-              this.DNStotalRow = 0;
-            }
-            if (response.data.data.result.FilesDownloaded) {
-              response.data.data.result.FilesDownloaded.forEach(item => {
-                switch (item.Zone) {
-                  case "Red":
-                    item.Zone_hoohoolab = "Malware";
-                    break;
-                  case "Grey":
-                    item.Zone_hoohoolab = "Not categorized";
-                    break;
-                  case "Yellow":
-                    item.Zone_hoohoolab = "Adware and other";
-                    break;
-                  case "Green":
-                    item.Zone_hoohoolab = "Clean";
-                    break;
-                  default:
-                    break;
-                }
-              });
-              this.filestotalRow =
-                response.data.data.result.FilesDownloaded.length;
-              this.item_type.files = true;
-            } else {
-              this.filestotalRow = 0;
-            }
-            if (response.data.data.result.FilesAccessed) {
-              response.data.data.result.FilesAccessed.forEach(item => {
-                switch (item.Zone) {
-                  case "Red":
-                    item.Zone_hoohoolab = "Malware";
-                    break;
-                  case "Orange":
-                    item.Zone_hoohoolab = "";
-                    break;
-                  case "Grey":
-                    item.Zone_hoohoolab = "Not categorized";
-                    break;
-                  case "Yellow":
-                    item.Zone_hoohoolab = "Adware and other";
-                    break;
-                  case "Green":
-                    item.Zone_hoohoolab = "Good";
-                    break;
-                  default:
-                    break;
-                }
-              });
-              this.requestedtotalRow =
-                response.data.data.result.FilesAccessed.length;
-              this.item_type.requested = true;
-            } else {
-              this.requestedtotalRow = 0;
-            }
-            if (response.data.data.result.FeedMasks) {
-              response.data.data.result.FeedMasks.forEach(item => {
-                switch (item.Zone) {
-                  case "Red":
-                    item.Zone_hoohoolab = "Dangerous";
-                    break;
-                  case "Grey":
-                    item.Zone_hoohoolab = "Not categorized";
-                    break;
-                  case "Yellow":
-                    item.Zone_hoohoolab = "Adware and other";
-                    break;
-                  case "Green":
-                    item.Zone_hoohoolab = "Clean";
-                    break;
-                  default:
-                    break;
-                }
-              });
-              this.urltotalRow = response.data.data.result.FeedMasks.length;
-              this.item_type.url = true;
-            } else {
-              this.urltotalRow = 0;
-            }
-            this.url_data = response.data.data.result;
-            setTimeout(() => {
-              this.loading = false;
-            }, 4000);
-          }
-        })
-        .catch(error => {
-          console.log(error);
-        });
-    },
-    whoispageChange(pInfo) {
+    whoispageChange (pInfo) {
       if (this.url_data.UrlDomainWhoIs) {
         let start = 0,
           end = 0;
@@ -847,7 +988,7 @@ export default {
         }
       }
     },
-    DNSpageChange(pInfo) {
+    DNSpageChange (pInfo) {
       if (this.url_data.DomainDnsResolutions) {
         let start = 0,
           end = 0;
@@ -862,7 +1003,7 @@ export default {
         }
       }
     },
-    filespageChange(pInfo) {
+    filespageChange (pInfo) {
       if (this.url_data.FilesDownloaded) {
         let start = 0,
           end = 0;
@@ -877,7 +1018,7 @@ export default {
         }
       }
     },
-    requestedpageChange(pInfo) {
+    requestedpageChange (pInfo) {
       if (this.url_data.FilesAccessed) {
         let start = 0,
           end = 0;
@@ -892,7 +1033,7 @@ export default {
         }
       }
     },
-    urlpageChange(pInfo) {
+    urlpageChange (pInfo) {
       if (this.url_data.FeedMasks) {
         let start = 0,
           end = 0;
@@ -906,6 +1047,156 @@ export default {
           this.urlpageArr.push(this.url_data.FeedMasks[i]);
         }
       }
+    },
+    refresh () {
+      this.loading = true;
+      this.$axios
+        // .get("https://47.105.196.251/site/extension", {
+        .get("/site/extension", {
+          params: {
+            reload: true,
+            indicator: this.$route.query.name
+          }
+        })
+        .then(response => {
+          if (response.data.status == "success") {
+            setTimeout(() => {
+              this.loading = false;
+            }, 1000);
+            this.ip_data_all = response.data.data;
+            switch (this.ip_data_all.result.Zone) {
+              case "Red":
+                this.ip_data_all.result.Zone_hoohoolab = "Dangerous";
+                break;
+              case "Orange":
+                this.ip_data_all.result.Zone_hoohoolab = "";
+                break;
+              case "Yellow":
+                this.ip_data_all.result.Zone_hoohoolab = "Adware and other";
+                break;
+              case "Grey":
+                this.ip_data_all.result.Zone_hoohoolab = "Not categorized";
+                break;
+              case "Green":
+                this.ip_data_all.result.Zone_hoohoolab = "Good";
+                break;
+              default:
+                break;
+            }
+            if (this.ip_data_all.result.UrlDomainWhoIs) {
+              this.whoistotalRow = this.ip_data_all.result.UrlDomainWhoIs.Contacts.length;
+              this.item_type.whois = true;
+            } else {
+              this.whoistotalRow = 0;
+            }
+            if (this.ip_data_all.result.DomainDnsResolutions) {
+              this.ip_data_all.result.DomainDnsResolutions.forEach(item => {
+                switch (item.Zone) {
+                  case "Red":
+                    item.Zone_hoohoolab = "Dangerous";
+                    break;
+                  case "Orange":
+                    item.Zone_hoohoolab = "";
+                    break;
+                  case "Grey":
+                    item.Zone_hoohoolab = "Not categorized";
+                    break;
+                  case "Yellow":
+                    item.Zone_hoohoolab = "Adware and other";
+                    break;
+                  case "Green":
+                    item.Zone_hoohoolab = "Good";
+                    break;
+                  default:
+                    break;
+                }
+              });
+              this.DNStotalRow = this.ip_data_all.result.DomainDnsResolutions.length;
+              this.item_type.dns = true;
+            } else {
+              this.DNStotalRow = 0;
+            }
+            if (this.ip_data_all.result.FilesDownloaded) {
+              this.ip_data_all.result.FilesDownloaded.forEach(item => {
+                switch (item.Zone) {
+                  case "Red":
+                    item.Zone_hoohoolab = "Malware";
+                    break;
+                  case "Grey":
+                    item.Zone_hoohoolab = "Not categorized";
+                    break;
+                  case "Yellow":
+                    item.Zone_hoohoolab = "Adware and other";
+                    break;
+                  case "Green":
+                    item.Zone_hoohoolab = "Clean";
+                    break;
+                  default:
+                    break;
+                }
+              });
+              this.filestotalRow = this.ip_data_all.result.FilesDownloaded.length;
+              this.item_type.files = true;
+            } else {
+              this.filestotalRow = 0;
+            }
+            if (this.ip_data_all.result.FilesAccessed) {
+              this.ip_data_all.result.FilesAccessed.forEach(item => {
+                switch (item.Zone) {
+                  case "Red":
+                    item.Zone_hoohoolab = "Malware";
+                    break;
+                  case "Orange":
+                    item.Zone_hoohoolab = "";
+                    break;
+                  case "Grey":
+                    item.Zone_hoohoolab = "Not categorized";
+                    break;
+                  case "Yellow":
+                    item.Zone_hoohoolab = "Adware and other";
+                    break;
+                  case "Green":
+                    item.Zone_hoohoolab = "Good";
+                    break;
+                  default:
+                    break;
+                }
+              });
+              this.requestedtotalRow = this.ip_data_all.result.FilesAccessed.length;
+              this.item_type.requested = true;
+            } else {
+              this.requestedtotalRow = 0;
+            }
+            if (this.ip_data_all.result.FeedMasks) {
+              this.ip_data_all.result.FeedMasks.forEach(item => {
+                switch (item.Zone) {
+                  case "Red":
+                    item.Zone_hoohoolab = "Dangerous";
+                    break;
+                  case "Grey":
+                    item.Zone_hoohoolab = "Not categorized";
+                    break;
+                  case "Yellow":
+                    item.Zone_hoohoolab = "Adware and other";
+                    break;
+                  case "Green":
+                    item.Zone_hoohoolab = "Clean";
+                    break;
+                  default:
+                    break;
+                }
+              });
+              this.urltotalRow = this.ip_data_all.result.FeedMasks.length;
+              this.item_type.url = true;
+            } else {
+              this.urltotalRow = 0;
+            }
+            this.url_data = this.ip_data_all.result;
+          }
+        })
+        .catch(error => {
+          console.log(error);
+        });
     }
   }
 };

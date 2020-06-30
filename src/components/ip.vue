@@ -1,272 +1,382 @@
 <template >
-    <div class="ip" v-loading.fullscreen.lock="loading" v-cloak>
-        <div class="title">IP查询</div>
-        <div class="container">
-            <div class="report clearfix">
-                <div class="report_top clearfix">
-                    <div class="report_top_title_box">
-                        <div class="report_top_title_box_left">
-                            <span class="report_top_title">Report for IP Address: </span>
-                            <span class="report_top_name" :class="{red:ip_data.Zone=='Red',yellow:ip_data.Zone=='Yellow',grey:ip_data.Zone=='Grey',green:ip_data.Zone=='Green'}">{{ip_data.Zone_hoohoolab}}</span>
-                        </div>
-                        <!-- <div class="report_top_title_box_right">
+  <div class="ip"
+       v-loading.fullscreen.lock="loading"
+       v-cloak>
+    <div class="title">
+      IP查询
+      <span class="data_source"
+            v-if="ip_data_all.source=='offline'">
+        <span>数据来自本地缓存</span>
+      </span>
+      <span class="info_img"
+            v-if="ip_data_all.source=='offline'">
+        <el-tooltip class="item"
+                    effect="dark"
+                    :content="ip_data_all.addtime*1000 | datefrm"
+                    placement="bottom">
+          <img src="../common/image/ip/info.png"
+               alt="">
+        </el-tooltip>
+      </span>
+      <button v-if="ip_data_all.source=='offline'"
+              class="btn_now"
+              @click="refresh">立即刷新</button>
+    </div>
+    <div class="container">
+      <div class="report clearfix">
+        <div class="report_top clearfix">
+          <div class="report_top_title_box">
+            <div class="report_top_title_box_left">
+              <span class="report_top_title">Report for IP Address: </span>
+              <span class="report_top_name"
+                    :class="{red:ip_data.Zone=='Red',yellow:ip_data.Zone=='Yellow',grey:ip_data.Zone=='Grey',green:ip_data.Zone=='Green'}">{{ip_data.Zone_hoohoolab}}</span>
+            </div>
+            <!-- <div class="report_top_title_box_right">
                             <img class="report_top_title_box_right_img" src="../common/image/ip/a.png" alt="">
                             <span class="report_top_title_box_right_span">Copy Request</span>
                             <img class="report_top_title_box_right_img" src="../common/image/ip/down.png" alt="">
                             <span class="report_top_title_box_right_span">Export all results</span>
                         </div> -->
-                    </div>
-                    <div class="report_top_bom">
-                        <img src="" alt="">
-                        <span>{{indicator}}</span>
-                    </div>
-                </div>
-                <div class="report_mid">
-                    <el-row class="report_mid_item">
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Hits</p>
-                            <p class="report_mid_item_col_value">{{ip_data.IpGeneralInfo.HitsCount}}</p>
-                            <p class="report_mid_item_col_name">Owner ID</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.WHOIS">
-                                    {{ip_data.IpWhoIs.Contacts[0].OrganizationId}}
-                                </span>
-                            </p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Owner name</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.WHOIS">
-                                    {{ip_data.IpWhoIs.Contacts[0].Name}}
-                                </span>
-                            </p>
-                            <p class="report_mid_item_col_name">Updated</p>
-                            <p class="report_mid_item_col_value" v-if="item_type.WHOIS">
-                                {{ip_data.IpWhoIs.Net.Changed}}
-                            </p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">Create</p>
-                            <p class="report_mid_item_col_value">
-                                <span v-if="item_type.WHOIS">
-                                    {{ip_data.IpWhoIs.Net.Created}}
-                                </span>
-                            </p>
-                        </el-col>
-                        <el-col :span="6" class="report_mid_item_col">
-                            <p class="report_mid_item_col_name">First Seen</p>
-                            <p class="report_mid_item_col_value">{{ip_data.IpGeneralInfo.FirstSeen}}</p>
-                        </el-col>
-                    </el-row>
-                </div>
-                <div class="report_bom">
-                    <span>Categories:</span>
-                    <span class="report_bom_box">
-                        <span v-for="item in ip_data.IpGeneralInfo.Categories" v-if="ip_data.IpGeneralInfo.Categories.length!=0">
-                            <img class="report_bom_img" src="../common/image/ip/span.png" alt="">
-                            <span class="report_bom_span">{{item}}</span>
-                        </span>
-                        <span v-if="ip_data.IpGeneralInfo.Categories.length==0">
-                            <img class="report_bom_img" src="../common/image/ip/span.png" alt="">
-                            <span class="report_bom_span">General</span>
-                        </span>
-                    </span>
-                </div>
-            </div>
-            <div class="whois clearfix" v-if="item_type.WHOIS">
-                <div class="whois_top ">
-                    <span class="whois_top_name">WHOIS</span>
-                    <!-- <img class="whois_top_img" src="../common/image/ip/info.png" alt=""> -->
-                </div>
-                <div class="whois_mid ">
-                    <el-row class="whois_mid_item">
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">IP Range</p>
-                            <p class="whois_mid_item_col_value">
-                                <span>{{ip_data.IpWhoIs.Net.RangeStart}}</span>
-                                <span>-</span>
-                                <span>{{ip_data.IpWhoIs.Net.RangeEnd}}</span>
-                            </p>
-                            <p class="whois_mid_item_col_name">Changed</p>
-                            <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Changed}}</p>
-                        </el-col>
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">Net Name</p>
-                            <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Name}}</p>
-                            <p class="whois_mid_item_col_name">AS Description</p>
-                            <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Asn[0].Description_cn}}</p>
-                        </el-col>
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">Net Description</p>
-                            <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Description}}</p>
-                            <p class="whois_mid_item_col_name">ASN</p>
-                            <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Asn[0].Number}}</p>
-                        </el-col>
-                        <el-col :span="6" class="whois_mid_item_col">
-                            <p class="whois_mid_item_col_name">Created</p>
-                            <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Created}}</p>
-                        </el-col>
-                    </el-row>
-                </div>
-                <div class="whois_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Contracts</th>
-                            <th>Name</th>
-                            <th style="width: 100px;">Type</th>
-                            <th style="width: 400px;">Address</th>
-                            <th>Phone/Fax</th>
-                            <th style="padding-right:36px;">Email</th>
-                        </tr>
-                        <tr v-for="item in ip_data.IpWhoIs.Contacts">
-                            <td style="padding-left:36px;" :title="item.ContactType">{{item.ContactType}}</td>
-                            <td :title="item.Name">{{item.Name}}</td>
-                            <td>-</td>
-                            <td style="width: 300px;">
-                                <span v-for="name in item.Address">
-                                    <span>{{name}}</span>
-                                    <span>;</span>
-                                </span>
-                            </td>
-                            <td>
-                                <p style="height:28px;line-height:40px;">
-                                    <span>{{item.Phone}}</span>
-                                    <span>Phone</span>
-                                </p>
-                                <p style="height:28px;line-height:20px;">
-                                    <span>{{item.Fax}}</span>
-                                    <span>Fax</span>
-                                </p>
-                            </td>
-                            <td style="padding-right:36px;" :title="item.Email">
-                                {{item.Email}}
-                            </td>
-                        </tr>
-                    </table>
-                    <v-page class="whois_page" :total-row="whoistotalRow" :page-size-menu='false' @page-change="whoispageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <div class="dns" v-if="item_type.DNS">
-                <div class="dns_top ">
-                    <span class="dns_top_name">DNS Resolutions for IP Address</span>
-                    <!-- <img class="dns_top_img" src="../common/image/ip/info.png" alt=""> -->
-                    <!-- <span class="dns_top_right">
+          </div>
+          <div class="report_top_bom">
+            <img src=""
+                 alt="">
+            <span>{{indicator}}</span>
+          </div>
+        </div>
+        <div class="report_mid">
+          <el-row class="report_mid_item">
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Hits</p>
+              <p class="report_mid_item_col_value">{{ip_data.IpGeneralInfo.HitsCount}}</p>
+              <p class="report_mid_item_col_name">Owner ID</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.WHOIS">
+                  {{ip_data.IpWhoIs.Contacts[0].OrganizationId}}
+                </span>
+              </p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Owner name</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.WHOIS">
+                  {{ip_data.IpWhoIs.Contacts[0].Name}}
+                </span>
+              </p>
+              <p class="report_mid_item_col_name">Updated</p>
+              <p class="report_mid_item_col_value"
+                 v-if="item_type.WHOIS">
+                {{ip_data.IpWhoIs.Net.Changed}}
+              </p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">Create</p>
+              <p class="report_mid_item_col_value">
+                <span v-if="item_type.WHOIS">
+                  {{ip_data.IpWhoIs.Net.Created}}
+                </span>
+              </p>
+            </el-col>
+            <el-col :span="6"
+                    class="report_mid_item_col">
+              <p class="report_mid_item_col_name">First Seen</p>
+              <p class="report_mid_item_col_value">{{ip_data.IpGeneralInfo.FirstSeen}}</p>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="report_bom">
+          <span>Categories:</span>
+          <span class="report_bom_box">
+            <span v-for="item in ip_data.IpGeneralInfo.Categories"
+                  v-if="ip_data.IpGeneralInfo.Categories.length!=0">
+              <img class="report_bom_img"
+                   src="../common/image/ip/span.png"
+                   alt="">
+              <span class="report_bom_span">{{item}}</span>
+            </span>
+            <span v-if="ip_data.IpGeneralInfo.Categories.length==0">
+              <img class="report_bom_img"
+                   src="../common/image/ip/span.png"
+                   alt="">
+              <span class="report_bom_span">General</span>
+            </span>
+          </span>
+        </div>
+      </div>
+      <div class="whois clearfix"
+           v-if="item_type.WHOIS">
+        <div class="whois_top ">
+          <span class="whois_top_name">WHOIS</span>
+          <!-- <img class="whois_top_img" src="../common/image/ip/info.png" alt=""> -->
+        </div>
+        <div class="whois_mid ">
+          <el-row class="whois_mid_item">
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">IP Range</p>
+              <p class="whois_mid_item_col_value">
+                <span>{{ip_data.IpWhoIs.Net.RangeStart}}</span>
+                <span>-</span>
+                <span>{{ip_data.IpWhoIs.Net.RangeEnd}}</span>
+              </p>
+              <p class="whois_mid_item_col_name">Changed</p>
+              <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Changed}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">Net Name</p>
+              <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Name}}</p>
+              <p class="whois_mid_item_col_name">AS Description</p>
+              <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Asn[0].Description_cn}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">Net Description</p>
+              <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Description}}</p>
+              <p class="whois_mid_item_col_name">ASN</p>
+              <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Asn[0].Number}}</p>
+            </el-col>
+            <el-col :span="6"
+                    class="whois_mid_item_col">
+              <p class="whois_mid_item_col_name">Created</p>
+              <p class="whois_mid_item_col_value">{{ip_data.IpWhoIs.Net.Created}}</p>
+            </el-col>
+          </el-row>
+        </div>
+        <div class="whois_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Contracts</th>
+              <th>Name</th>
+              <th style="width: 100px;">Type</th>
+              <th style="width: 400px;">Address</th>
+              <th>Phone/Fax</th>
+              <th style="padding-right:36px;">Email</th>
+            </tr>
+            <tr v-for="item in ip_data.IpWhoIs.Contacts">
+              <td style="padding-left:36px;"
+                  :title="item.ContactType">{{item.ContactType}}</td>
+              <td :title="item.Name">{{item.Name}}</td>
+              <td>-</td>
+              <td style="width: 300px;">
+                <span v-for="name in item.Address">
+                  <span>{{name}}</span>
+                  <span>;</span>
+                </span>
+              </td>
+              <td>
+                <p style="height:28px;line-height:40px;">
+                  <span>{{item.Phone}}</span>
+                  <span>Phone</span>
+                </p>
+                <p style="height:28px;line-height:20px;">
+                  <span>{{item.Fax}}</span>
+                  <span>Fax</span>
+                </p>
+              </td>
+              <td style="padding-right:36px;"
+                  :title="item.Email">
+                {{item.Email}}
+              </td>
+            </tr>
+          </table>
+          <v-page class="whois_page"
+                  :total-row="whoistotalRow"
+                  :page-size-menu='false'
+                  @page-change="whoispageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <div class="dns"
+           v-if="item_type.DNS">
+        <div class="dns_top ">
+          <span class="dns_top_name">DNS Resolutions for IP Address</span>
+          <!-- <img class="dns_top_img" src="../common/image/ip/info.png" alt=""> -->
+          <!-- <span class="dns_top_right">
                         <img class="dns_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="dns_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="dns_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 100px;">Hits(≈)</th>
-                            <th style="width: 300px;">Domain</th>
-                            <th>First Resolved</th>
-                            <th>Last Resolved</th>
-                            <th>Peak Date</th>
-                            <th style="padding-right:36px;">Daily Peak(≈)</th>
-                        </tr>
-                        <tr v-for="item in DNSpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.HitsCount">{{item.HitsCount}}</td>
-                            <td style="width: 300px;" :title="item.Domain">{{item.Domain}}</td>
-                            <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
-                            <td :title="item.LastSeen">{{item.LastSeen}}</td>
-                            <td :title="item.PeakDate">{{item.PeakDate}}</td>
-                            <td style="padding-right:36px;" :title="item.DailyPeak">{{item.DailyPeak}}</td>
-                        </tr>
-                    </table>
-                    <v-page class="dns_page" :total-row="DNStotalRow" :page-size-menu='false' @page-change="DNSpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <div class="files" v-if="item_type.Files">
-                <div class="files_top ">
-                    <span class="files_top_name">Files related to IP address</span>
-                    <!-- <img class="files_top_img" src="../common/image/ip/info.png" alt=""> -->
-                    <!-- <span class="files_top_right">
+        </div>
+        <div class="dns_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 100px;">Hits(≈)</th>
+              <th style="width: 300px;">Domain</th>
+              <th>First Resolved</th>
+              <th>Last Resolved</th>
+              <th>Peak Date</th>
+              <th style="padding-right:36px;">Daily Peak(≈)</th>
+            </tr>
+            <tr v-for="item in DNSpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.HitsCount">{{item.HitsCount}}</td>
+              <td style="width: 300px;"
+                  :title="item.Domain">{{item.Domain}}</td>
+              <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
+              <td :title="item.LastSeen">{{item.LastSeen}}</td>
+              <td :title="item.PeakDate">{{item.PeakDate}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.DailyPeak">{{item.DailyPeak}}</td>
+            </tr>
+          </table>
+          <v-page class="dns_page"
+                  :total-row="DNStotalRow"
+                  :page-size-menu='false'
+                  @page-change="DNSpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <div class="files"
+           v-if="item_type.Files">
+        <div class="files_top ">
+          <span class="files_top_name">Files related to IP address</span>
+          <!-- <img class="files_top_img" src="../common/image/ip/info.png" alt=""> -->
+          <!-- <span class="files_top_right">
                         <img class="files_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="files_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="files_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 100px;">Hits(≈)</th>
-                            <th style="width: 300px;">Files MD5</th>
-                            <th>Detection name</th>
-                            <th>URL</th>
-                            <th>Last seen</th>
-                            <th style="padding-right:36px;">First seen</th>
-                        </tr>
-                        <tr v-for="item in filespageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.DownloadHitsCount">{{item.DownloadHitsCount}}</td>
-                            <td style="width: 300px;" :title="item.Md5">{{item.Md5}}</td>
-                            <td :title="item.DetectionName">{{item.DetectionName}}</td>
-                            <td :title="item.Url">{{item.Url}}</td>
-                            <td :title="item.LastSeen">{{item.LastSeen}}</td>
-                            <td style="padding-right:36px;" :title="item.FirstSeen">{{item.FirstSeen}}</td>
-                        </tr>
-                    </table>
-                    <v-page class="files_page" :total-row="filestotalRow" :page-size-menu='false' @page-change="filespageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
-            <div class="host" v-if="item_type.Hosted">
-                <div class="host_top ">
-                    <span class="host_top_name">Hosted URLs</span>
-                    <!-- <img class="host_top_img" src="../common/image/ip/info.png" alt=""> -->
-                    <!-- <span class="host_top_right">
+        </div>
+        <div class="files_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 100px;">Hits(≈)</th>
+              <th style="width: 300px;">Files MD5</th>
+              <th>Detection name</th>
+              <th>URL</th>
+              <th>Last seen</th>
+              <th style="padding-right:36px;">First seen</th>
+            </tr>
+            <tr v-for="item in filespageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.DownloadHitsCount">{{item.DownloadHitsCount}}</td>
+              <td style="width: 300px;"
+                  :title="item.Md5">{{item.Md5}}</td>
+              <td :title="item.DetectionName">{{item.DetectionName}}</td>
+              <td :title="item.Url">{{item.Url}}</td>
+              <td :title="item.LastSeen">{{item.LastSeen}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.FirstSeen">{{item.FirstSeen}}</td>
+            </tr>
+          </table>
+          <v-page class="files_page"
+                  :total-row="filestotalRow"
+                  :page-size-menu='false'
+                  @page-change="filespageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
+      <div class="host"
+           v-if="item_type.Hosted">
+        <div class="host_top ">
+          <span class="host_top_name">Hosted URLs</span>
+          <!-- <img class="host_top_img" src="../common/image/ip/info.png" alt=""> -->
+          <!-- <span class="host_top_right">
                         <img class="host_top_right_img" src="../common/image/ip/down.png" alt="">
                         <span class="host_top_right_name">Download Data</span>
                     </span> -->
-                </div>
-                <div class="host_bom">
-                    <table>
-                        <tr>
-                            <th style="padding-left:36px;">Status</th>
-                            <th style="width: 100px;">Hits(≈)</th>
-                            <th style="width: 600px;">URL</th>
-                            <th>First seen</th>
-                            <th style="padding-right:36px;">Last seen</th>
-                        </tr>
-                        <tr v-for="item in hostpageArr">
-                            <td style="padding-left:36px;" :title="item.Zone_hoohoolab">
-                                <img class="Zone_img" src="../common/image/ip/red.png" alt="" v-if="item.Zone=='Red'">
-                                <img class="Zone_img" src="../common/image/ip/yellow.png" v-if="item.Zone=='Yellow'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/green.png" v-if="item.Zone=='Green'" alt="">
-                                <img class="Zone_img" src="../common/image/ip/grey.png" v-if="item.Zone=='Grey'" alt="">
-                                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}" class="Zone_name">
-                                    {{item.Zone_hoohoolab}}
-                                </span>
-                            </td>
-                            <td :title="item.UrlHitsCount">{{item.UrlHitsCount}}</td>
-                            <td :title="item.Url">{{item.Url}}</td>
-                            <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
-                            <td style="padding-right:36px;" :title="item.LastSeen">{{item.LastSeen}}</td>
-                        </tr>
-                    </table>
-                    <v-page class="host_page" :total-row="hosttotalRow" :page-size-menu='false' @page-change="hostpageChange" :border="false" align="center"></v-page>
-                </div>
-            </div>
         </div>
+        <div class="host_bom">
+          <table>
+            <tr>
+              <th style="padding-left:36px;">Status</th>
+              <th style="width: 100px;">Hits(≈)</th>
+              <th style="width: 600px;">URL</th>
+              <th>First seen</th>
+              <th style="padding-right:36px;">Last seen</th>
+            </tr>
+            <tr v-for="item in hostpageArr">
+              <td style="padding-left:36px;"
+                  :title="item.Zone_hoohoolab">
+                <img class="Zone_img"
+                     src="../common/image/ip/red.png"
+                     alt=""
+                     v-if="item.Zone=='Red'">
+                <img class="Zone_img"
+                     src="../common/image/ip/yellow.png"
+                     v-if="item.Zone=='Yellow'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/green.png"
+                     v-if="item.Zone=='Green'"
+                     alt="">
+                <img class="Zone_img"
+                     src="../common/image/ip/grey.png"
+                     v-if="item.Zone=='Grey'"
+                     alt="">
+                <span :class="{red:item.Zone=='Red',yellow:item.Zone=='Yellow',grey:item.Zone=='Grey',green:item.Zone=='Green'}"
+                      class="Zone_name">
+                  {{item.Zone_hoohoolab}}
+                </span>
+              </td>
+              <td :title="item.UrlHitsCount">{{item.UrlHitsCount}}</td>
+              <td :title="item.Url">{{item.Url}}</td>
+              <td :title="item.FirstSeen">{{item.FirstSeen}}</td>
+              <td style="padding-right:36px;"
+                  :title="item.LastSeen">{{item.LastSeen}}</td>
+            </tr>
+          </table>
+          <v-page class="host_page"
+                  :total-row="hosttotalRow"
+                  :page-size-menu='false'
+                  @page-change="hostpageChange"
+                  :border="false"
+                  align="center"></v-page>
+        </div>
+      </div>
     </div>
+  </div>
 </template>
 <style  lang="less">
 .ip {
@@ -299,6 +409,34 @@
     line-height: 64px;
     font-size: 20px;
     font-weight: 600;
+    position: relative;
+    .data_source {
+      font-size: 14px;
+      position: absolute;
+      right: 200px;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .info_img {
+      position: absolute;
+      right: 150px;
+      top: 50%;
+      transform: translateY(-50%);
+      cursor: pointer;
+    }
+    .btn_now {
+      cursor: pointer;
+      position: absolute;
+      right: 48px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: #0070ff;
+      font-size: 14px;
+      color: #fff;
+      width: 80px;
+      border-radius: 4px;
+      height: 32px;
+    }
   }
   .container {
     padding: 0 48px;
@@ -571,11 +709,13 @@
 }
 </style>
 <script>
+import moment from "moment";
 export default {
   name: "ip",
-  data() {
+  data () {
     return {
       ip_data: "",
+      ip_data_all: "",
       indicator: "",
       whoistotalRow: 100,
       whoispageArr: [],
@@ -594,53 +734,238 @@ export default {
       loading: true
     };
   },
-  created() {
-    // console.log(this.$route.query.name);
-    this.indicator = this.$route.query.name;
+  created () {
     this.loading = true;
-    this.intelligence();
+    setTimeout(() => {
+      this.loading = false;
+    }, 1000);
+    this.indicator = this.$route.query.name;
+    this.ip_data_all = JSON.parse(sessionStorage.getItem("IpGeneralInfo"));
+    switch (this.ip_data_all.result.Zone) {
+      case "Red":
+        this.ip_data_all.result.Zone_hoohoolab = "Dangerous";
+        break;
+      case "Orange":
+        this.ip_data_all.result.Zone_hoohoolab = "Suspicious";
+        break;
+      case "Grey":
+        this.ip_data_all.result.Zone_hoohoolab = "Not categorized";
+        break;
+      case "Green":
+        this.ip_data_all.result.Zone_hoohoolab = "Good";
+        break;
+      default:
+        break;
+    }
+    if (this.ip_data_all.result.IpWhoIs.Contacts) {
+      this.whoistotalRow = this.ip_data_all.result.IpWhoIs.Contacts.length;
+      this.item_type.WHOIS = true;
+    } else {
+      this.whoistotalRow = 0;
+    }
+    if (this.ip_data_all.result.IpDnsResolutions) {
+      this.ip_data_all.result.IpDnsResolutions.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Dangerous";
+            break;
+          case "Orange":
+            item.Zone_hoohoolab = "";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Good";
+            break;
+          default:
+            break;
+        }
+      });
+      this.DNStotalRow = this.ip_data_all.result.IpDnsResolutions.length;
+      this.item_type.DNS = true;
+    } else {
+      this.DNStotalRow = 0;
+    }
+    if (this.ip_data_all.result.FilesDownloadedFromIp) {
+      this.ip_data_all.result.FilesDownloadedFromIp.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Malware";
+            break;
+          case "Orange":
+            item.Zone_hoohoolab = "";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Good";
+            break;
+          default:
+            break;
+        }
+      });
+      this.filestotalRow = this.ip_data_all.result.FilesDownloadedFromIp.length;
+      this.item_type.Files = true;
+    } else {
+      this.filestotalRow = 0;
+    }
+    if (this.ip_data_all.result.HostedUrls) {
+      this.ip_data_all.result.HostedUrls.forEach(item => {
+        switch (item.Zone) {
+          case "Red":
+            item.Zone_hoohoolab = "Dangerous";
+            break;
+          case "Grey":
+            item.Zone_hoohoolab = "Not categorized";
+            break;
+          case "Yellow":
+            item.Zone_hoohoolab = "Adware and other";
+            break;
+          case "Green":
+            item.Zone_hoohoolab = "Clean";
+            break;
+          default:
+            break;
+        }
+      });
+      this.hosttotalRow = this.ip_data_all.result.HostedUrls.length;
+      this.item_type.Hosted = true;
+    } else {
+      this.hosttotalRow = 0;
+    }
+    this.ip_data = this.ip_data_all.result;
+    if (!this.ip_data.IpGeneralInfo.Categories) {
+      this.ip_data.IpGeneralInfo.Categories = [];
+    }
+    if (this.ip_data.IpWhoIs.Asn != null && this.ip_data.IpWhoIs.Asn) {
+      this.ip_data.IpWhoIs.Asn.forEach(item => {
+        if (item.Description == null) {
+          item.Description_cn = "";
+        } else {
+          item.Description_cn = item.Description[0];
+        }
+      });
+    } else {
+      this.ip_data.IpWhoIs.Asn = [{ Description_cn: "", Number: "" }];
+    }
   },
-  mounted() {
+  mounted () {
     // console.log(this.$route.query.name);
+  },
+  filters: {
+    datefrm: function (el) {
+      return moment(el).format("YYYY-MM-DD HH:mm:ss");
+    }
   },
   methods: {
-    intelligence() {
+    whoispageChange (pInfo) {
+      if (this.ip_data.IpWhoIs) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.ip_data.IpWhoIs.Contacts.length) {
+          end = this.ip_data.IpWhoIs.Contacts.length;
+        }
+        this.whoispageArr.splice(0, this.whoispageArr.length);
+        for (let i = start; i < end; i++) {
+          this.whoispageArr.push(this.ip_data.IpWhoIs.Contacts[i]);
+        }
+      }
+    },
+    DNSpageChange (pInfo) {
+      if (this.ip_data.IpDnsResolutions) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.ip_data.IpDnsResolutions.length) {
+          end = this.ip_data.IpDnsResolutions.length;
+        }
+        this.DNSpageArr.splice(0, this.DNSpageArr.length);
+        for (let i = start; i < end; i++) {
+          this.DNSpageArr.push(this.ip_data.IpDnsResolutions[i]);
+        }
+      }
+    },
+    filespageChange (pInfo) {
+      if (this.ip_data.FilesDownloadedFromIp) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.ip_data.FilesDownloadedFromIp.length) {
+          end = this.ip_data.FilesDownloadedFromIp.length;
+        }
+        this.filespageArr.splice(0, this.filespageArr.length);
+        for (let i = start; i < end; i++) {
+          this.filespageArr.push(this.ip_data.FilesDownloadedFromIp[i]);
+        }
+      }
+    },
+    hostpageChange (pInfo) {
+      if (this.ip_data.HostedUrls) {
+        let start = 0,
+          end = 0;
+        start = pInfo.pageSize * (pInfo.pageNumber - 1);
+        end = start + pInfo.pageSize;
+        if (end > this.ip_data.HostedUrls.length) {
+          end = this.ip_data.HostedUrls.length;
+        }
+        this.hostpageArr.splice(0, this.hostpageArr.length);
+        for (let i = start; i < end; i++) {
+          this.hostpageArr.push(this.ip_data.HostedUrls[i]);
+        }
+      }
+    },
+    refresh () {
+      this.loading = true;
       this.$axios
-        // .get("https://47.105.196.251:8443/intelligence/extension", {
-        .get("/intelligence/extension", {
+        // .get("https://47.105.196.251:8443/site/extension", {
+        .get("/site/extension", {
           params: {
+            reload: true,
             indicator: this.$route.query.name
-            // indicator: "1.10.204.200"
           }
         })
-        //     .get("/intelligence/extension")
         .then(response => {
           if (response.data.status == "success") {
-            switch (response.data.data.result.Zone) {
+            setTimeout(() => {
+              this.loading = false;
+            }, 1000);
+            this.ip_data_all = response.data.data;
+            switch (this.ip_data_all.result.Zone) {
               case "Red":
-                response.data.data.result.Zone_hoohoolab = "Dangerous";
+                this.ip_data_all.result.Zone_hoohoolab = "Dangerous";
                 break;
               case "Orange":
-                response.data.data.result.Zone_hoohoolab = "Suspicious";
+                this.ip_data_all.result.Zone_hoohoolab = "Suspicious";
                 break;
               case "Grey":
-                response.data.data.result.Zone_hoohoolab = "Not categorized";
+                this.ip_data_all.result.Zone_hoohoolab = "Not categorized";
                 break;
               case "Green":
-                response.data.data.result.Zone_hoohoolab = "Good";
+                this.ip_data_all.result.Zone_hoohoolab = "Good";
                 break;
               default:
                 break;
             }
-            if (response.data.data.result.IpWhoIs.Contacts) {
-              this.whoistotalRow =
-                response.data.data.result.IpWhoIs.Contacts.length;
+            if (this.ip_data_all.result.IpWhoIs.Contacts) {
+              this.whoistotalRow = this.ip_data_all.result.IpWhoIs.Contacts.length;
               this.item_type.WHOIS = true;
             } else {
               this.whoistotalRow = 0;
             }
-            if (response.data.data.result.IpDnsResolutions) {
-              response.data.data.result.IpDnsResolutions.forEach(item => {
+            if (this.ip_data_all.result.IpDnsResolutions) {
+              this.ip_data_all.result.IpDnsResolutions.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Dangerous";
@@ -661,14 +986,13 @@ export default {
                     break;
                 }
               });
-              this.DNStotalRow =
-                response.data.data.result.IpDnsResolutions.length;
+              this.DNStotalRow = this.ip_data_all.result.IpDnsResolutions.length;
               this.item_type.DNS = true;
             } else {
               this.DNStotalRow = 0;
             }
-            if (response.data.data.result.FilesDownloadedFromIp) {
-              response.data.data.result.FilesDownloadedFromIp.forEach(item => {
+            if (this.ip_data_all.result.FilesDownloadedFromIp) {
+              this.ip_data_all.result.FilesDownloadedFromIp.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Malware";
@@ -689,14 +1013,13 @@ export default {
                     break;
                 }
               });
-              this.filestotalRow =
-                response.data.data.result.FilesDownloadedFromIp.length;
+              this.filestotalRow = this.ip_data_all.result.FilesDownloadedFromIp.length;
               this.item_type.Files = true;
             } else {
               this.filestotalRow = 0;
             }
-            if (response.data.data.result.HostedUrls) {
-              response.data.data.result.HostedUrls.forEach(item => {
+            if (this.ip_data_all.result.HostedUrls) {
+              this.ip_data_all.result.HostedUrls.forEach(item => {
                 switch (item.Zone) {
                   case "Red":
                     item.Zone_hoohoolab = "Dangerous";
@@ -714,12 +1037,15 @@ export default {
                     break;
                 }
               });
-              this.hosttotalRow = response.data.data.result.HostedUrls.length;
+              this.hosttotalRow = this.ip_data_all.result.HostedUrls.length;
               this.item_type.Hosted = true;
             } else {
               this.hosttotalRow = 0;
             }
-            this.ip_data = response.data.data.result;
+            this.ip_data = this.ip_data_all.result;
+            if (!this.ip_data.IpGeneralInfo.Categories) {
+              this.ip_data.IpGeneralInfo.Categories = [];
+            }
             if (this.ip_data.IpWhoIs.Asn != null && this.ip_data.IpWhoIs.Asn) {
               this.ip_data.IpWhoIs.Asn.forEach(item => {
                 if (item.Description == null) {
@@ -731,74 +1057,11 @@ export default {
             } else {
               this.ip_data.IpWhoIs.Asn = [{ Description_cn: "", Number: "" }];
             }
-            setTimeout(() => {
-              this.loading = false;
-            }, 4000);
           }
         })
         .catch(error => {
           console.log(error);
         });
-    },
-    whoispageChange(pInfo) {
-      if (this.ip_data.IpWhoIs) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.ip_data.IpWhoIs.Contacts.length) {
-          end = this.ip_data.IpWhoIs.Contacts.length;
-        }
-        this.whoispageArr.splice(0, this.whoispageArr.length);
-        for (let i = start; i < end; i++) {
-          this.whoispageArr.push(this.ip_data.IpWhoIs.Contacts[i]);
-        }
-      }
-    },
-    DNSpageChange(pInfo) {
-      if (this.ip_data.IpDnsResolutions) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.ip_data.IpDnsResolutions.length) {
-          end = this.ip_data.IpDnsResolutions.length;
-        }
-        this.DNSpageArr.splice(0, this.DNSpageArr.length);
-        for (let i = start; i < end; i++) {
-          this.DNSpageArr.push(this.ip_data.IpDnsResolutions[i]);
-        }
-      }
-    },
-    filespageChange(pInfo) {
-      if (this.ip_data.FilesDownloadedFromIp) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.ip_data.FilesDownloadedFromIp.length) {
-          end = this.ip_data.FilesDownloadedFromIp.length;
-        }
-        this.filespageArr.splice(0, this.filespageArr.length);
-        for (let i = start; i < end; i++) {
-          this.filespageArr.push(this.ip_data.FilesDownloadedFromIp[i]);
-        }
-      }
-    },
-    hostpageChange(pInfo) {
-      if (this.ip_data.HostedUrls) {
-        let start = 0,
-          end = 0;
-        start = pInfo.pageSize * (pInfo.pageNumber - 1);
-        end = start + pInfo.pageSize;
-        if (end > this.ip_data.HostedUrls.length) {
-          end = this.ip_data.HostedUrls.length;
-        }
-        this.hostpageArr.splice(0, this.hostpageArr.length);
-        for (let i = start; i < end; i++) {
-          this.hostpageArr.push(this.ip_data.HostedUrls[i]);
-        }
-      }
     }
   }
 };
