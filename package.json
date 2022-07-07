@@ -14,7 +14,7 @@
     "animate.css": "^3.7.0",
     "country-data": "0.0.31",
     "element-ui": "^2.10.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "v-page": "^2.0.8",
     "vue": "^2.5.2",
     "vue-paginate": "^3.6.0",
