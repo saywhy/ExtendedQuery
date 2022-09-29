@@ -35,7 +35,7 @@
     "chalk": "^2.0.1",
     "copy-webpack-plugin": "^4.0.1",
     "css-loader": "^0.28.0",
-    "d3": "^5.8.0",
+    "d3": "^7.6.1",
     "d3-tooltip": "0.0.1",
     "echarts": "^4.2.0-rc.2",
     "echarts-gl": "^1.1.1",
